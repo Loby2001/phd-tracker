@@ -64,7 +64,12 @@
 
     "bandiMur": true,
 
-    "jobrxiv": true
+    "jobrxiv": true,
+
+    "mailAlerts": {
+      "enabledNote": "Per attivare: leggi il README, sezione 'Alert email nativi (EURAXESS, FindAPhD) senza usare la tua mail personale'. Serve una casella email dedicata + i GitHub Secret IMAP_USER e IMAP_PASSWORD (mai qui, questo file è pubblico).",
+      "enabled": false
+    }
   },
 
   "manualCheckLinks": [

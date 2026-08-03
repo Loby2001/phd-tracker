@@ -196,11 +196,117 @@ tu stesso questi file a mano, ricordati di incrementare quel numero, o il
 tuo telefono continuerà a vedere la versione vecchia. Dopo aver caricato i
 file su GitHub, chiudi del tutto l'app (o Safari) e riaprila: nel giro di
 pochi secondi dovrebbe aggiornarsi da sola. Se proprio non si aggiorna,
-rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 11).
+rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 12).
 
 ---
 
-## 7. Cambiare la frequenza di controllo
+## 7. Alert email nativi (EURAXESS, FindAPhD) senza usare la tua mail personale
+
+EURAXESS e FindAPhD non si possono raschiare automaticamente (il loro
+`robots.txt` lo vieta, vedi punto 10 "Limiti noti"), ma entrambi offrono un
+loro alert nativo via email quando esce un nuovo annuncio che corrisponde
+a una tua ricerca salvata. Per farli confluire nella stessa app e nella
+stessa notifica ntfy di tutto il resto — invece di controllare a mano una
+casella di posta — puoi collegare una **casella email dedicata** (mai la
+tua personale) che lo script legge automaticamente ogni 6 ore insieme alle
+altre fonti.
+
+**Perché è permesso e non è "scraping"**: qui lo script non tocca in
+nessun modo il sito di EURAXESS o FindAPhD. Legge, via IMAP, una casella
+email che è tua e che controlli tu; il contenuto sono email che il sito
+stesso ti manda perché gliel'hai chiesto tu iscrivendoti al loro alert.
+È l'equivalente automatico di aprire la posta e cliccare i link — non
+viola nessun `robots.txt` né termine di servizio.
+
+### 7.1 Crea una casella email dedicata
+
+Usa un indirizzo **nuovo, mai usato altrove**, così non condividi la tua
+mail personale con nessuno script né con EURAXESS/FindAPhD. Il modo più
+semplice: crea un nuovo account Gmail gratuito solo per questo (es.
+`tuonome.phdalerts@gmail.com`). Va benissimo anche un altro provider,
+purché supporti IMAP (Outlook/Hotmail, Yahoo, ecc.) — negli esempi sotto
+uso Gmail perché è il più comune.
+
+### 7.2 Genera una "app password" IMAP (non la password normale)
+
+Gmail richiede una password dedicata per l'accesso via app/script:
+
+1. Sul nuovo account, vai su **myaccount.google.com/security** e attiva
+   la **verifica in due passaggi** (obbligatoria per generare app
+   password).
+2. Poi vai su **myaccount.google.com/apppasswords**, crea una nuova app
+   password (nome libero, es. "PhD Tracker"), e copia il codice di 16
+   caratteri che ti mostra — è quella la password da usare, non quella
+   del tuo account.
+3. Se usi un altro provider, cerca "app password IMAP" nelle impostazioni
+   di sicurezza del tuo provider: il concetto è lo stesso.
+
+### 7.3 Imposta gli alert nativi su questo nuovo indirizzo
+
+- **EURAXESS**: vai su [euraxess.ec.europa.eu/jobs/search](https://euraxess.ec.europa.eu/jobs/search),
+  imposta i filtri che ti interessano (materia, paese...), cerca l'opzione
+  per salvare la ricerca / ricevere un alert via email (nella loro
+  interfaccia, di solito vicino ai risultati di ricerca) e usa il nuovo
+  indirizzo email dedicato.
+- **FindAPhD**: vai su [findaphd.com/phds](https://www.findaphd.com/phds/),
+  imposta i filtri, usa la funzione **"Save search"** e attiva la
+  notifica email, sempre sul nuovo indirizzo dedicato.
+
+### 7.4 Aggiungi le credenziali come GitHub Secrets
+
+Nel repository, **Settings → Secrets and variables → Actions → New
+repository secret**, aggiungi:
+
+- `IMAP_USER`: l'indirizzo email dedicato (es.
+  `tuonome.phdalerts@gmail.com`)
+- `IMAP_PASSWORD`: l'app password di 16 caratteri del punto 7.2 (**non**
+  la password normale dell'account)
+- `IMAP_HOST` (facoltativo): solo se non usi Gmail. Per Gmail non
+  serve, viene usato `imap.gmail.com` automaticamente.
+
+Queste credenziali non finiscono mai nel codice pubblico del repository:
+restano solo nei Secrets, visibili solo alle Actions durante l'esecuzione.
+
+### 7.5 Attiva la fonte in `config/config.json`
+
+Apri `config/config.json` e cambia:
+
+```json
+"mailAlerts": {
+  "enabled": false
+}
+```
+
+in:
+
+```json
+"mailAlerts": {
+  "enabled": true
+}
+```
+
+Dal controllo automatico successivo (entro 6 ore, o forza subito col
+punto 9), lo script si collega alla casella, legge le email non lette che
+contengono link a un annuncio EURAXESS o FindAPhD, le fa comparire
+nell'app esattamente come le altre fonti (con notifica ntfy inclusa), e le
+segna come lette per non rileggerle al giro successivo.
+
+**Limiti onesti di questa integrazione**: non conosco il template esatto
+delle email di alert di EURAXESS/FindAPhD (non è documentato
+pubblicamente), quindi l'estrazione cerca semplicemente, dentro l'email,
+i link il cui indirizzo corrisponde al formato stabile della pagina di un
+singolo annuncio su ciascun sito (es. `euraxess.ec.europa.eu/jobs/123456`
+o `findaphd.com/phds/project/...`) — non estrae automaticamente scadenza o
+paga da queste email (compariranno senza quei dettagli). Se dopo averla
+attivata non vedi comparire nulla pur ricevendo le email, controlla i log
+dell'esecuzione su GitHub Actions: se il formato dell'email è cambiato o è
+diverso da quanto previsto, fammi vedere un log (o incolla — con dati
+anonimizzati se preferisci — il contenuto di un'email di esempio) così
+posso aggiustare l'estrazione.
+
+---
+
+## 8. Cambiare la frequenza di controllo
 
 Modifica la riga `cron` in `.github/workflows/check.yml`. Esempi:
 
@@ -213,7 +319,7 @@ all'ora italiana estiva.)
 
 ---
 
-## 8. Testare subito, senza aspettare
+## 9. Testare subito, senza aspettare
 
 Vai su **Actions** (in alto nel repository) → clicca sul workflow
 "Controllo bandi dottorato" → **Run workflow** → **Run workflow**. Parte
@@ -226,13 +332,14 @@ in poi, ricevi una notifica solo per le novità vere.
 
 ---
 
-## 9. Limiti noti (onestamente)
+## 10. Limiti noti (onestamente)
 
-- **EURAXESS** e **FindAPhD** non vengono controllati automaticamente: il
-  loro `robots.txt` chiede esplicitamente ai crawler di non raschiare le
-  pagine di ricerca/annuncio, e ho preferito rispettarlo. Restano comunque
-  linkati in fondo alla pagina: ti conviene impostare i loro alert nativi
-  via email (vedi sezione "Fonti da controllare manualmente" nell'app).
+- **EURAXESS** e **FindAPhD** non vengono raschiati direttamente dal sito:
+  il loro `robots.txt` chiede esplicitamente ai crawler di non farlo, e ho
+  preferito rispettarlo. Restano comunque linkati in fondo alla pagina per
+  impostare i loro alert nativi via email — e se non vuoi controllarli a
+  mano, puoi collegare quegli alert alla stessa app/notifica tramite una
+  casella email dedicata (vedi punto 7).
 - **jobs.ac.uk** copre in modo molto solido il Regno Unito e in modo
   discreto il resto d'Europa (molte università europee vi pubblicano
   annunci in inglese), ma non è esaustivo per bandi pubblicati solo in
@@ -278,14 +385,16 @@ in poi, ricevi una notifica solo per le novità vere.
   com'è, **senza conversione di valuta** — confrontare cifre in valute
   diverse va fatto a occhio. Se l'annuncio non menziona un importo da
   nessuna parte, semplicemente non compare nulla.
-- **EURAXESS** e **FindAPhD** restano gli unici grandi esclusi: il loro
-  `robots.txt` chiede esplicitamente ai crawler di non raschiare le
-  pagine di ricerca/annuncio, e ho preferito rispettarlo. Restano comunque
-  linkati in fondo alla pagina per i loro alert nativi via email.
+- **Gli alert email di EURAXESS/FindAPhD (punto 7)**, se attivati, vengono
+  letti in modo generico (cerco solo link che puntano a un singolo
+  annuncio), perché non conosco il template esatto delle loro email: non
+  estraggono scadenza o paga, e se il formato dell'email risultasse molto
+  diverso dal previsto potrebbero non restituire nulla — controlla i log
+  di GitHub Actions dopo averli attivati.
 
 ---
 
-## 10. Struttura del progetto
+## 11. Struttura del progetto
 
 ```
 phd-tracker/
@@ -309,7 +418,7 @@ phd-tracker/
 
 ---
 
-## 11. Aggiungere l'app alla schermata Home (iPhone)
+## 12. Aggiungere l'app alla schermata Home (iPhone)
 
 1. Apri `https://TUO-USERNAME.github.io/phd-tracker/` in **Safari** (deve
    essere Safari, non Chrome, perché su iOS solo Safari può installare

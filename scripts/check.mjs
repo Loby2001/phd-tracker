@@ -9,6 +9,8 @@
 
 import Parser from "rss-parser";
 import * as cheerio from "cheerio";
+import { ImapFlow } from "imapflow";
+import { simpleParser } from "mailparser";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -431,6 +433,156 @@ async function fetchBandiMur() {
 }
 
 // ---------------------------------------------------------------------------
+// Avvisi via email (EURAXESS, FindAPhD) — letti da una casella IMAP dedicata
+// ---------------------------------------------------------------------------
+// EURAXESS e FindAPhD vietano nel loro robots.txt di raschiare automaticamente
+// le pagine di ricerca/annuncio (vedi README, sezione "Limiti noti"), quindi
+// qui non si scarica nulla dal loro sito: si legge invece, via IMAP, una
+// casella email dedicata su cui l'utente ha impostato i loro alert nativi.
+// È il sito stesso a mandare l'email, su richiesta esplicita dell'utente —
+// non è scraping, non viola le loro condizioni d'uso.
+//
+// Attivo solo se sources.mailAlerts.enabled è true in config.json E sono
+// impostate le variabili d'ambiente IMAP_USER / IMAP_PASSWORD (come GitHub
+// Secrets, mai nel repository). Vedi README per la configurazione completa.
+// Nota: i template esatti delle email di alert non sono documentati
+// pubblicamente, quindi l'estrazione qui sotto è volutamente generica
+// (cerca link il cui URL corrisponde al pattern stabile della pagina di
+// un singolo annuncio su ciascun sito) invece di basarsi su selettori
+// specifici che potrebbero non esistere o cambiare. Se un'email non produce
+// risultati, non è un errore bloccante: gli altri annunci continuano a
+// funzionare normalmente.
+
+const MAIL_PROFILES = [
+  {
+    label: "EURAXESS (avviso email)",
+    hrefTest: (href) => /euraxess\.ec\.europa\.eu\/jobs\/\d+/.test(href),
+  },
+  {
+    label: "FindAPhD (avviso email)",
+    hrefTest: (href) => /findaphd\.com\/phds\/project\//.test(href),
+  },
+];
+
+function extractMailItems(html, text) {
+  const items = [];
+  const seenLinks = new Set();
+
+  if (html) {
+    const $ = cheerio.load(html);
+    $("a[href]").each((_, el) => {
+      const $el = $(el);
+      const href = ($el.attr("href") || "").trim();
+      if (!href || seenLinks.has(href)) return;
+      const profile = MAIL_PROFILES.find((p) => p.hrefTest(href));
+      if (!profile) return;
+
+      let title = $el.text().replace(/\s+/g, " ").trim();
+      if (!title || title.length < 6) {
+        // Alcuni template usano immagini o link vuoti come testo: prova il
+        // blocco genitore più vicino.
+        const $container = $el.closest("tr, td, div, li, p");
+        title = $container.length ? $container.text().replace(/\s+/g, " ").trim().slice(0, 140) : "";
+      }
+      if (!title) title = href;
+
+      seenLinks.add(href);
+      items.push({ title, link: href, description: title, source: profile.label });
+    });
+  } else if (text) {
+    // Fallback per email in solo testo: cerca URL nudi che corrispondono ai
+    // pattern noti, usando la riga stessa come titolo (meglio di niente).
+    const lines = text.split(/\r?\n/);
+    for (const line of lines) {
+      const urlMatch = line.match(/https?:\/\/\S+/);
+      if (!urlMatch) continue;
+      const href = urlMatch[0].replace(/[.,;)]+$/, "");
+      if (seenLinks.has(href)) continue;
+      const profile = MAIL_PROFILES.find((p) => p.hrefTest(href));
+      if (!profile) continue;
+      seenLinks.add(href);
+      const title = line.replace(href, "").replace(/\s+/g, " ").trim() || href;
+      items.push({ title, link: href, description: title, source: profile.label });
+    }
+  }
+
+  return items;
+}
+
+async function fetchMailAlerts(config) {
+  const items = [];
+  if (!config.sources?.mailAlerts?.enabled) return items;
+
+  const user = process.env.IMAP_USER;
+  const pass = process.env.IMAP_PASSWORD;
+  if (!user || !pass) {
+    console.warn(
+      "⚠️  mailAlerts è attivo in config.json ma IMAP_USER/IMAP_PASSWORD non sono impostati come GitHub Secrets: salto questa fonte."
+    );
+    return items;
+  }
+  const host = process.env.IMAP_HOST || "imap.gmail.com";
+  const port = Number(process.env.IMAP_PORT || 993);
+
+  const client = new ImapFlow({
+    host,
+    port,
+    secure: true,
+    auth: { user, pass },
+    logger: false,
+  });
+
+  try {
+    await withRetry(() => client.connect(), { isRetryable: is5xxOrNetworkError, retries: 1, delayMs: 3000 });
+    const lock = await client.getMailboxLock("INBOX");
+    try {
+      const uids = await client.search({ seen: false }, { uid: true });
+      if (!uids || uids.length === 0) {
+        console.log("📧 Nessuna nuova email di alert da leggere.");
+      }
+      for (const uid of uids || []) {
+        try {
+          const msg = await client.fetchOne(uid, { source: true }, { uid: true });
+          if (!msg || !msg.source) continue;
+          const parsed = await simpleParser(msg.source);
+          const extracted = extractMailItems(parsed.html || null, parsed.text || null);
+          for (const it of extracted) {
+            items.push({
+              ...it,
+              pubDate: parsed.date ? parsed.date.toISOString() : null,
+              deadlineText: null,
+              deadlineISO: null,
+            });
+          }
+        } catch (err) {
+          console.warn(`⚠️  Email alert (uid ${uid}): impossibile leggerla/analizzarla: ${err.message}`);
+        } finally {
+          // Segna comunque come letta: evita di rileggerla all'infinito se
+          // il contenuto non è interpretabile.
+          try {
+            await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true });
+          } catch {
+            // non bloccante
+          }
+        }
+      }
+    } finally {
+      lock.release();
+    }
+    await client.logout();
+  } catch (err) {
+    console.warn(`⚠️  Lettura casella email alert fallita: ${err.message}`);
+    try {
+      await client.logout();
+    } catch {
+      // già disconnesso o mai connesso
+    }
+  }
+
+  return dedupByLink(items);
+}
+
+// ---------------------------------------------------------------------------
 // Filtri
 // ---------------------------------------------------------------------------
 function matchesPhdIndicator(item, config) {
@@ -554,6 +706,9 @@ async function main() {
       allRaw.push(...(await fetchJobrxivKeyword(kw)));
       await pause();
     }
+  }
+  if (sources.mailAlerts?.enabled) {
+    allRaw.push(...(await fetchMailAlerts(config)));
   }
 
   console.log(`Trovati ${allRaw.length} annunci grezzi dalle fonti configurate.`);
