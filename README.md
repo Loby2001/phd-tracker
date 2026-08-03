@@ -159,15 +159,15 @@ automatico (entro 6 ore), oppure puoi forzarlo subito (punto 7).
 
 ## 6. Segnare "mi interessa" / "non interessa"
 
-Ogni annuncio in elenco ha due pulsanti, 👍 **Interessa** e 👎 **Non
+Ogni annuncio in elenco ha due pulsanti, **Interessa** e **Non
 interessa**:
 
-- Toccando 👍 l'annuncio viene evidenziato (bordo verde) e salito in cima
-  all'elenco.
-- Toccando 👎 l'annuncio viene contrassegnato come scartato: appare
-  visivamente sbiadito e scivola in fondo all'elenco, ma **non viene mai
-  nascosto o rimosso automaticamente** — resta sempre lì, apribile e
-  ripristinabile in qualsiasi momento.
+- Toccando **Interessa** l'annuncio viene evidenziato (bordo verde) e
+  salito in cima all'elenco.
+- Toccando **Non interessa** l'annuncio viene contrassegnato come
+  scartato: appare visivamente sbiadito e scivola in fondo all'elenco, ma
+  **non viene mai nascosto o rimosso automaticamente** — resta sempre lì,
+  apribile e ripristinabile in qualsiasi momento.
 - Toccando di nuovo lo stesso pulsante annulli la scelta e l'annuncio
   torna "da valutare".
 
@@ -180,9 +180,23 @@ tu stesso di filtrare.
 
 Questa scelta è salvata solo sul tuo dispositivo (`localStorage` del
 browser), non nel repository: se apri l'app da un altro telefono o
-cancelli i dati del browser, le etichette 👍/👎 ripartono da zero. Non
-viene toccato l'elenco `data/listings.json` che viene aggiornato dal
-controllo automatico.
+cancelli i dati del browser, le etichette Interessa/Non interessa
+ripartono da zero. Non viene toccato l'elenco `data/listings.json` che
+viene aggiornato dal controllo automatico.
+
+**Non vedi i nuovi pulsanti dopo aver caricato i file aggiornati?**
+L'app è una PWA con un service worker che tiene una copia offline dei
+file `index.html`/`style.css`/`app.js` per farla funzionare anche senza
+connessione: se avevi già aperto l'app prima di questo aggiornamento, il
+telefono potrebbe continuare a mostrarti la versione salvata in cache.
+Ogni volta che questi tre file cambiano, aggiorno anche il numero di
+versione dentro `sw.js` (`const CACHE = "phdtracker-vN"`) proprio per
+forzare il telefono a scaricare la versione nuova — se in futuro modifichi
+tu stesso questi file a mano, ricordati di incrementare quel numero, o il
+tuo telefono continuerà a vedere la versione vecchia. Dopo aver caricato i
+file su GitHub, chiudi del tutto l'app (o Safari) e riaprila: nel giro di
+pochi secondi dovrebbe aggiornarsi da sola. Se proprio non si aggiorna,
+rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 11).
 
 ---
 

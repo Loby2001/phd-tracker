@@ -8,6 +8,11 @@
   --accent: #4f8ef7;
   --accent-2: #ffd25a;
   --new-badge: #29b673;
+  --new-badge-tint: rgba(41, 182, 115, 0.14);
+  --deadline: #e0a15c;
+  --deadline-tint: rgba(224, 161, 92, 0.14);
+  --danger: #e2745c;
+  --danger-tint: rgba(226, 116, 92, 0.12);
   --chip-bg: #1f2c4a;
   --chip-bg-active: #2f4a86;
   --radius: 14px;
@@ -23,6 +28,7 @@ html, body {
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-text-size-adjust: 100%;
+  letter-spacing: 0.01em;
 }
 
 a { color: var(--accent); text-decoration: none; }
@@ -44,19 +50,34 @@ header.top {
 }
 
 header.top h1 {
-  margin: 0 0 2px;
-  font-size: 1.5rem;
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 650;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  letter-spacing: 0.01em;
 }
 
-header.top h1 .cap { font-size: 1.3rem; }
+header.top h1 .mark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(155deg, var(--accent), #2a5cc4);
+  color: #f4f8ff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
 
 .subtitle {
   margin: 0;
   color: var(--text-dim);
-  font-size: 0.92rem;
+  font-size: 0.9rem;
 }
 
 .meta-bar {
@@ -141,7 +162,7 @@ main { margin-top: 18px; }
 }
 
 .card.card-interested {
-  border-color: var(--new-badge);
+  border-color: rgba(41, 182, 115, 0.45);
 }
 
 .card.card-dismissed {
@@ -182,24 +203,26 @@ main { margin-top: 18px; }
 }
 
 .badge-new {
-  background: var(--new-badge);
-  color: #06281a;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 3px 8px;
+  background: var(--new-badge-tint);
+  color: var(--new-badge);
+  border: 1px solid rgba(41, 182, 115, 0.35);
+  font-size: 0.66rem;
+  font-weight: 650;
+  padding: 3px 9px;
   border-radius: 999px;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
 }
 
 .badge-deadline {
-  background: #e0762c;
-  color: #2a1200;
-  font-size: 0.66rem;
-  font-weight: 700;
-  padding: 3px 8px;
+  background: var(--deadline-tint);
+  color: var(--deadline);
+  border: 1px solid rgba(224, 161, 92, 0.35);
+  font-size: 0.64rem;
+  font-weight: 650;
+  padding: 3px 9px;
   border-radius: 999px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
 }
 
@@ -218,12 +241,21 @@ main { margin-top: 18px; }
 }
 
 .meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 0.76rem;
-  padding: 3px 9px;
+  padding: 3px 10px;
   border-radius: 999px;
   background: var(--bg-elev);
   border: 1px solid var(--card-border);
   color: var(--text);
+}
+
+.meta-pill .icon,
+.interest-btn .icon {
+  flex: none;
+  opacity: 0.85;
 }
 
 .card .source-line {
@@ -255,6 +287,10 @@ main { margin-top: 18px; }
 
 .interest-btn {
   flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-size: 0.8rem;
   padding: 7px 10px;
   border-radius: 10px;
@@ -263,6 +299,7 @@ main { margin-top: 18px; }
   color: var(--text-dim);
   cursor: pointer;
   text-align: center;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
 }
 
 .interest-btn:active {
@@ -270,16 +307,16 @@ main { margin-top: 18px; }
 }
 
 .interest-btn.interest-yes.active {
-  background: var(--new-badge);
-  border-color: var(--new-badge);
-  color: #06281a;
+  background: var(--new-badge-tint);
+  border-color: rgba(41, 182, 115, 0.45);
+  color: var(--new-badge);
   font-weight: 600;
 }
 
 .interest-btn.interest-no.active {
-  background: #e0762c;
-  border-color: #e0762c;
-  color: #2a1200;
+  background: var(--danger-tint);
+  border-color: rgba(226, 116, 92, 0.4);
+  color: var(--danger);
   font-weight: 600;
 }
 

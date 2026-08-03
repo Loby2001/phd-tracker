@@ -46,6 +46,17 @@ function setInterest(id, value) {
 
 const $ = (sel) => document.querySelector(sel);
 
+// Icone lineari minimali (nessuna emoji, per un aspetto più sobrio e coerente
+// su tutte le piattaforme).
+const ICON_PIN =
+  '<svg class="icon" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 14.2S12.8 9.7 12.8 6.4A4.8 4.8 0 1 0 3.2 6.4C3.2 9.7 8 14.2 8 14.2Z"/><circle cx="8" cy="6.4" r="1.6"/></svg>';
+const ICON_COIN =
+  '<svg class="icon" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="5.8"/><path d="M8 4.8v6.4M6.1 6.3c0-.9.85-1.5 1.9-1.5s1.9.6 1.9 1.4-.75 1.1-1.9 1.4c-1.15.3-1.9.6-1.9 1.5s.85 1.5 1.9 1.5 1.9-.6 1.9-1.5"/></svg>';
+const ICON_CHECK =
+  '<svg class="icon" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l3 3 6-7"/></svg>';
+const ICON_CROSS =
+  '<svg class="icon" viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+
 function daysAgo(iso) {
   if (!iso) return Infinity;
   const diffMs = Date.now() - new Date(iso).getTime();
@@ -276,8 +287,8 @@ function renderList() {
       ${
         loc || item.payText
           ? `<div class="meta-row">
-              ${loc ? `<span class="meta-pill">📍 ${escapeHtml(loc)}</span>` : ""}
-              ${item.payText ? `<span class="meta-pill">💰 ${escapeHtml(item.payText)}</span>` : ""}
+              ${loc ? `<span class="meta-pill">${ICON_PIN}${escapeHtml(loc)}</span>` : ""}
+              ${item.payText ? `<span class="meta-pill">${ICON_COIN}${escapeHtml(item.payText)}</span>` : ""}
             </div>`
           : ""
       }
@@ -290,10 +301,10 @@ function renderList() {
       ${interest === "no" ? '<div class="dismissed-note">Segnato come "non interessa" — resta comunque disponibile qui.</div>' : ""}
       <div class="interest-row">
         <button type="button" class="interest-btn interest-yes${interest === "yes" ? " active" : ""}" data-action="yes">
-          👍 ${interest === "yes" ? "Ti interessa" : "Interessa"}
+          ${ICON_CHECK}${interest === "yes" ? "Ti interessa" : "Interessa"}
         </button>
         <button type="button" class="interest-btn interest-no${interest === "no" ? " active" : ""}" data-action="no">
-          👎 ${interest === "no" ? "Scartata" : "Non interessa"}
+          ${ICON_CROSS}${interest === "no" ? "Scartata" : "Non interessa"}
         </button>
       </div>
       <div class="footer-line">
@@ -361,7 +372,7 @@ function bindControls() {
     renderList();
   });
 
-  // Delega degli eventi sui pulsanti 👍/👎: le card vengono ricreate ad ogni
+  // Delega degli eventi sui pulsanti "Interessa"/"Non interessa": le card vengono ricreate ad ogni
   // renderList(), quindi il listener va agganciato al contenitore #list.
   $("#list").addEventListener("click", (ev) => {
     const btn = ev.target.closest(".interest-btn");
