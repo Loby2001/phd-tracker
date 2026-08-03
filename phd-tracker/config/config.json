@@ -1,0 +1,63 @@
+{
+  "ntfyTopicHint": "Il vero topic va messo come GitHub Secret NTFY_TOPIC, non qui (questo file è pubblico).",
+  "sitePublicUrl": "https://TUO-USERNAME.github.io/phd-tracker/",
+
+  "requirePhdIndicator": true,
+  "phdIndicatorWords": [
+    "phd", "ph.d", "doctoral", "doctorate", "dottorato", "dottorando",
+    "studentship", "graduate researcher", "early stage researcher", "esr"
+  ],
+
+  "keywords": [
+    "organic chemistry",
+    "chimica organica",
+    "synthetic chemistry",
+    "medicinal chemistry",
+    "catalysis",
+    "photocatalysis",
+    "electrochemistry",
+    "sustainable chemistry",
+    "green chemistry"
+  ],
+
+  "excludeKeywords": [
+    "inorganic chemistry only",
+    "purely computational"
+  ],
+
+  "countries": [],
+
+  "sources": {
+    "jobsAcUkSubjects": [
+      "chemistry",
+      "biological-sciences",
+      "physics-and-astronomy",
+      "engineering-and-technology",
+      "computer-science-and-informatics",
+      "mathematics-and-statistics",
+      "medicine-dentistry-and-health",
+      "environment-earth-and-marine-sciences",
+      "psychology",
+      "social-sciences",
+      "economics",
+      "humanities"
+    ],
+    "academicPositionsFields": [
+      "chemistry-organic-chemistry",
+      "medicinal-chemistry",
+      "chemistry",
+      "physics",
+      "biology",
+      "computer-science",
+      "mathematics",
+      "environmental-science",
+      "materials-science",
+      "engineering"
+    ]
+  },
+
+  "manualCheckLinks": [
+    { "name": "EURAXESS Jobs", "url": "https://euraxess.ec.europa.eu/jobs/search", "note": "Non raschiato automaticamente (il loro robots.txt lo vieta): imposta un alert nativo qui." },
+    { "name": "FindAPhD", "url": "https://www.findaphd.com/phds/", "note": "Non raschiato automaticamente: imposta un alert nativo (Save search) qui." }
+  ]
+}
