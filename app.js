@@ -17,6 +17,12 @@ function daysAgo(iso) {
   return diffMs / (1000 * 60 * 60 * 24);
 }
 
+function daysUntil(iso) {
+  if (!iso) return Infinity;
+  const diffMs = new Date(iso).getTime() - Date.now();
+  return diffMs / (1000 * 60 * 60 * 24);
+}
+
 function formatDate(iso) {
   if (!iso) return "";
   try {
@@ -83,10 +89,40 @@ function matchesFilters(item) {
   return true;
 }
 
+function sortListings(items) {
+  return [...items].sort((a, b) => {
+    const ad = a.deadlineISO ? new Date(a.deadlineISO).getTime() : Infinity;
+    const bd = b.deadlineISO ? new Date(b.deadlineISO).getTime() : Infinity;
+    if (ad !== bd) return ad - bd; // scadenze più vicine prima
+    const af = a.firstSeen ? new Date(a.firstSeen).getTime() : 0;
+    const bf = b.firstSeen ? new Date(b.firstSeen).getTime() : 0;
+    return bf - af; // poi le più recenti
+  });
+}
+
+function deadlineBadgeHtml(item) {
+  const du = daysUntil(item.deadlineISO);
+  if (item.deadlineISO && du >= 0 && du <= 14) {
+    const days = Math.ceil(du);
+    return `<span class="badge-deadline">${days <= 0 ? "SCADE OGGI" : `SCADE TRA ${days} G.`}</span>`;
+  }
+  return "";
+}
+
+function deadlineLineText(item) {
+  if (item.deadlineISO) {
+    return `Scadenza: ${formatDate(item.deadlineISO)}`;
+  }
+  if (item.deadlineText) {
+    return `Scadenza (indicativa): ${item.deadlineText}`;
+  }
+  return null;
+}
+
 function renderList() {
   const list = $("#list");
   const empty = $("#emptyState");
-  const filtered = state.listings.filter(matchesFilters);
+  const filtered = sortListings(state.listings.filter(matchesFilters));
 
   $("#totalCount").textContent = `${filtered.length} offerte${
     filtered.length !== state.listings.length ? ` (di ${state.listings.length})` : ""
@@ -105,11 +141,16 @@ function renderList() {
 
     const isNew = daysAgo(item.firstSeen) <= 3;
     const tags = (item.matchedKeywords || []).filter((k) => !k.startsWith("(nessun filtro"));
+    const deadlineLine = deadlineLineText(item);
+    const snippet = (item.description || "").trim();
 
     card.innerHTML = `
       <div class="row-top">
         <h2><a href="${item.link}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a></h2>
-        ${isNew ? '<span class="badge-new">NUOVO</span>' : ""}
+        <div class="badge-col">
+          ${isNew ? '<span class="badge-new">NUOVO</span>' : ""}
+          ${deadlineBadgeHtml(item)}
+        </div>
       </div>
       <div class="source-line">${escapeHtml(item.source || "")}</div>
       ${
@@ -117,8 +158,9 @@ function renderList() {
           ? `<div class="tag-row">${tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>`
           : ""
       }
+      ${snippet ? `<p class="snippet">${escapeHtml(snippet.slice(0, 200))}${snippet.length > 200 ? "…" : ""}</p>` : ""}
       <div class="footer-line">
-        <span>Trovato il ${formatDate(item.firstSeen)}</span>
+        <span>${deadlineLine ? escapeHtml(deadlineLine) : `Trovato il ${formatDate(item.firstSeen)}`}</span>
         <a href="${item.link}" target="_blank" rel="noopener">Apri annuncio →</a>
       </div>
     `;

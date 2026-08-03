@@ -1,6 +1,6 @@
 {
   "ntfyTopicHint": "Il vero topic va messo come GitHub Secret NTFY_TOPIC, non qui (questo file è pubblico).",
-  "sitePublicUrl": "https://loby2001.github.io/phd-tracker/",
+  "sitePublicUrl": "https://TUO-USERNAME.github.io/phd-tracker/",
 
   "requirePhdIndicator": true,
   "phdIndicatorWords": [
@@ -20,7 +20,10 @@
     "green chemistry"
   ],
 
-  "excludeKeywords": [],
+  "excludeKeywords": [
+    "inorganic chemistry only",
+    "purely computational"
+  ],
 
   "countries": [],
 
@@ -50,7 +53,26 @@
       "environmental-science",
       "materials-science",
       "engineering"
-    ]
+    ],
+
+    "academicTransfer": true,
+
+    "phdPortalSubjects": [
+      "chemistry",
+      "physics",
+      "biology",
+      "medicine",
+      "engineering",
+      "computer-science",
+      "mathematics",
+      "environmental-science",
+      "materials-science",
+      "pharmacy"
+    ],
+
+    "bandiMur": true,
+
+    "jobrxiv": true
   },
 
   "manualCheckLinks": [

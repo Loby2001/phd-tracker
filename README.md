@@ -96,6 +96,10 @@ a destra quando apri il file) — non serve programmare:
   Lascialo vuoto `[]` per non filtrare per materia (prendi tutti i
   dottorati, di ogni campo).
 - **`excludeKeywords`**: parole che, se presenti, scartano l'annuncio.
+- **`countries`**: elenco di paesi/città da richiedere (es. `["Spain",
+  "Netherlands", "Italy"]`, in inglese perché quasi tutti gli annunci sono
+  in inglese). Lascialo vuoto `[]` per non filtrare per paese (tutta
+  Europa e oltre).
 - **`requirePhdIndicator`**: se `true`, tiene solo annunci che contengono
   parole come "PhD", "doctoral", "studentship" ecc. (evita di mostrare
   post-doc o cattedre). Consigliato lasciarlo `true`.
@@ -109,6 +113,30 @@ a destra quando apri il file) — non serve programmare:
   pagina del campo che ti interessa e copia la parte finale dell'URL
   (es. `.../jobs/field/chemistry-organic-chemistry` → slug
   `chemistry-organic-chemistry`).
+- **`sources.academicTransfer`**: `true`/`false`. Se attivo, controlla
+  tutte le posizioni di dottorato su
+  [academictransfer.com](https://www.academictransfer.com/en/job-type/phd/)
+  (portale collettivo delle università olandesi — copertura forte sui
+  Paesi Bassi).
+- **`sources.phdPortalSubjects`**: elenco di materie di
+  [phdportal.com](https://www.phdportal.com) da controllare (ambito
+  "Europe"). Per trovare lo slug di una materia, cerca su phdportal.com e
+  guarda l'URL (es. `.../search/phd/chemistry/europe` → slug `chemistry`).
+  **Attenzione**: qui si tratta più di *cataloghi di programmi* che di
+  bandi con scadenza precisa — cambiano meno spesso delle altre fonti.
+- **`sources.bandiMur`**: `true`/`false`. Se attivo, controlla
+  [bandi.mur.gov.it](https://bandi.mur.gov.it), il portale ufficiale del
+  Ministero italiano con **tutti** i bandi di dottorato di **tutti** gli
+  atenei italiani (Torino, Bologna, Milano compresi). Non c'è un filtro
+  per parola chiave nell'URL, quindi lo script scarica l'elenco completo
+  dei bandi aperti e applica i tuoi `keywords` localmente. **Nota**: i
+  bandi italiani sono di solito concorsi generali per ateneo/dipartimento
+  (es. "Dottorato in Chimica"), non annunci per singolo progetto — il
+  tema di ricerca specifico si concorda in genere contattando prima un
+  docente (come discusso in chat).
+- **`sources.jobrxiv`**: `true`/`false`. Se attivo, cerca su
+  [jobrxiv.org](https://jobrxiv.org) (bacheca accademica generalista) una
+  query per ciascuna parola in `keywords` + "phd".
 
 Ogni modifica al file viene applicata dal **prossimo** controllo
 automatico (entro 6 ore), oppure puoi forzarlo subito (punto 7).
@@ -151,16 +179,29 @@ in poi, ricevi una notifica solo per le novità vere.
 - **jobs.ac.uk** copre in modo molto solido il Regno Unito e in modo
   discreto il resto d'Europa (molte università europee vi pubblicano
   annunci in inglese), ma non è esaustivo per bandi pubblicati solo in
-  lingua locale (es. concorsi italiani su bandi.mur.gov.it).
-- **academicpositions.com** non offre un feed ufficiale: lo script legge
-  la pagina HTML cercando i link agli annunci. Se il sito cambia
-  struttura, questa fonte potrebbe smettere di restituire risultati finché
-  non si aggiorna il selettore in `scripts/check.mjs` (funzione
-  `fetchAcademicPositionsField`) — jobs.ac.uk via RSS invece è molto più
-  stabile nel tempo.
-- Per bandi italiani (dottorato XLII ciclo ecc.) conviene comunque
-  continuare a controllare `bandi.mur.gov.it` e i siti dei singoli atenei:
-  non sono coperti da questa app.
+  lingua locale.
+- **academicpositions.com**, **academictransfer.com**, **phdportal.com**,
+  **jobrxiv.org** e **bandi.mur.gov.it** non offrono un feed ufficiale
+  strutturato per queste ricerche: lo script legge la pagina HTML
+  cercando i link agli annunci con un criterio abbastanza robusto (basato
+  sul pattern stabile dell'URL di ciascun annuncio, non su classi CSS che
+  cambiano spesso). Se uno di questi siti cambia struttura in modo
+  sostanziale, quella fonte potrebbe smettere di restituire risultati
+  finché non si aggiorna il selettore corrispondente in
+  `scripts/check.mjs` — **jobs.ac.uk via RSS invece è molto più stabile
+  nel tempo** perché usa un feed ufficiale. Se una fonte smette di
+  funzionare, i log dell'esecuzione su GitHub Actions (tab *Actions* →
+  ultima esecuzione) mostrano un avviso `⚠️` con il nome della fonte.
+- **Le scadenze (`deadlineISO`/badge "SCADE TRA...")** sono estratte
+  automaticamente dal testo dell'annuncio quando il formato è
+  riconoscibile (poche varianti coperte: inglese "Closing on:",
+  "Deadline", "Closes", e italiano "scade il"). Se il sito usa un formato
+  diverso, l'annuncio compare comunque ma senza scadenza evidenziata —
+  meglio non mostrare una data che rischiare di mostrarne una sbagliata.
+- **EURAXESS** e **FindAPhD** restano gli unici grandi esclusi: il loro
+  `robots.txt` chiede esplicitamente ai crawler di non raschiare le
+  pagine di ricerca/annuncio, e ho preferito rispettarlo. Restano comunque
+  linkati in fondo alla pagina per i loro alert nativi via email.
 
 ---
 
