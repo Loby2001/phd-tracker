@@ -5,6 +5,7 @@ const state = {
   config: {},
   lastRun: null,
   activeChip: localStorage.getItem("phdtracker.chip") || "Tutte",
+  activeCountry: localStorage.getItem("phdtracker.country") || "Tutti i paesi",
   search: localStorage.getItem("phdtracker.search") || "",
   onlyNew: localStorage.getItem("phdtracker.onlyNew") === "1",
 };
@@ -77,9 +78,44 @@ function renderChips() {
   }
 }
 
+function buildCountryOptions() {
+  const set = new Set();
+  for (const item of state.listings) {
+    if (item.country) set.add(item.country);
+  }
+  return ["Tutti i paesi", ...Array.from(set).sort()];
+}
+
+function renderCountryChips() {
+  const options = buildCountryOptions();
+  const row = $("#countryChipRow");
+  const wrap = $("#countryChipWrap");
+  if (options.length <= 1) {
+    wrap.style.display = "none"; // ancora nessun paese riconosciuto: non mostrare la riga
+    return;
+  }
+  wrap.style.display = "";
+  row.innerHTML = "";
+  for (const opt of options) {
+    const el = document.createElement("div");
+    el.className = "chip" + (opt === state.activeCountry ? " active" : "");
+    el.textContent = opt;
+    el.addEventListener("click", () => {
+      state.activeCountry = opt;
+      localStorage.setItem("phdtracker.country", opt);
+      renderCountryChips();
+      renderList();
+    });
+    row.appendChild(el);
+  }
+}
+
 function matchesFilters(item) {
   if (state.activeChip !== "Tutte") {
     if (!(item.matchedKeywords || []).includes(state.activeChip)) return false;
+  }
+  if (state.activeCountry !== "Tutti i paesi") {
+    if (item.country !== state.activeCountry) return false;
   }
   if (state.onlyNew && daysAgo(item.firstSeen) > 7) return false;
   if (state.search.trim()) {
@@ -119,6 +155,12 @@ function deadlineLineText(item) {
   return null;
 }
 
+function locationText(item) {
+  if (item.city && item.country) return `${item.city}, ${item.country}`;
+  if (item.country) return item.country;
+  return null;
+}
+
 function renderList() {
   const list = $("#list");
   const empty = $("#emptyState");
@@ -143,6 +185,7 @@ function renderList() {
     const tags = (item.matchedKeywords || []).filter((k) => !k.startsWith("(nessun filtro"));
     const deadlineLine = deadlineLineText(item);
     const snippet = (item.description || "").trim();
+    const loc = locationText(item);
 
     card.innerHTML = `
       <div class="row-top">
@@ -153,6 +196,14 @@ function renderList() {
         </div>
       </div>
       <div class="source-line">${escapeHtml(item.source || "")}</div>
+      ${
+        loc || item.payText
+          ? `<div class="meta-row">
+              ${loc ? `<span class="meta-pill">📍 ${escapeHtml(loc)}</span>` : ""}
+              ${item.payText ? `<span class="meta-pill">💰 ${escapeHtml(item.payText)}</span>` : ""}
+            </div>`
+          : ""
+      }
       ${
         tags.length
           ? `<div class="tag-row">${tags.map((t) => `<span class="tag">${escapeHtml(t)}</span>`).join("")}</div>`
@@ -229,6 +280,7 @@ async function init() {
   await loadData();
   renderMeta();
   renderChips();
+  renderCountryChips();
   bindControls();
   renderList();
   renderManualLinks();

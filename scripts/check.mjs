@@ -173,6 +173,105 @@ function extractDeadline(text) {
 }
 
 // ---------------------------------------------------------------------------
+// Estrazione luogo (best-effort): cerca il nome di un paese nel testo.
+// Elenco volutamente europeo + pochi altri paesi comuni; esclude nomi
+// ambigui che generano falsi positivi in bacheche accademiche (es.
+// "Georgia" quasi sempre è lo stato USA, non il paese; "Jordan" è quasi
+// sempre un nome di persona).
+// ---------------------------------------------------------------------------
+const COUNTRIES = [
+  "United Kingdom", "UK", "Ireland", "Italy", "Italia", "Spain", "Portugal",
+  "France", "Germany", "Netherlands", "Belgium", "Luxembourg", "Switzerland",
+  "Austria", "Sweden", "Norway", "Denmark", "Finland", "Iceland", "Poland",
+  "Czech Republic", "Czechia", "Slovakia", "Hungary", "Slovenia", "Croatia",
+  "Romania", "Bulgaria", "Greece", "Estonia", "Latvia", "Lithuania", "Malta",
+  "Cyprus", "Serbia", "Ukraine", "Turkey", "Morocco",
+  "United States", "USA", "Canada", "Australia", "New Zealand", "Japan",
+  "China", "Singapore", "South Korea",
+];
+
+// Ordina le stringhe più lunghe prima, così "United Kingdom" batte "UK" ecc.
+const COUNTRY_PATTERNS = COUNTRIES
+  .sort((a, b) => b.length - a.length)
+  .map((name) => ({ name, re: new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i") }));
+
+function normalizeCountryLabel(name) {
+  if (name === "UK") return "United Kingdom";
+  if (name === "USA") return "United States";
+  if (name === "Italia") return "Italy";
+  if (name === "Czechia") return "Czech Republic";
+  return name;
+}
+
+// Ritorna sia l'etichetta normalizzata (per il filtro/visualizzazione) sia il
+// testo grezzo effettivamente trovato (serve per cercare la città accanto,
+// visto che nel testo originale può comparire come "UK" e non "United Kingdom").
+function extractCountry(text) {
+  if (!text) return null;
+  for (const { name, re } of COUNTRY_PATTERNS) {
+    const m = text.match(re);
+    if (m) return { label: normalizeCountryLabel(name), raw: m[0] };
+  }
+  return null;
+}
+
+// Euristica leggera per la città: cerca "Parola/e, <Paese>" con la prima
+// lettera maiuscola. Bassa affidabilità intenzionale: se il pattern non è
+// chiaro si preferisce non mostrare nulla piuttosto che sbagliare.
+function extractCity(text, countryRaw) {
+  if (!text || !countryRaw) return null;
+  const escaped = countryRaw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`([A-ZÀ-Ý][A-Za-zÀ-ÿ'\\-]+(?:\\s[A-ZÀ-Ý][A-Za-zÀ-ÿ'\\-]+){0,2}),\\s*${escaped}\\b`);
+  const m = text.match(re);
+  if (m && m[1] && m[1].length <= 28 && !/\d/.test(m[1])) return m[1].trim();
+  return null;
+}
+
+function deriveLocation(item) {
+  const hay = `${item.title} ${item.description} ${item.source}`;
+  if (item.countryHint) {
+    return { country: item.countryHint, city: extractCity(hay, item.countryHint) };
+  }
+  const found = extractCountry(hay);
+  if (!found) return { country: null, city: null };
+  return { country: found.label, city: extractCity(hay, found.raw) };
+}
+
+// ---------------------------------------------------------------------------
+// Estrazione stipendio/borsa (best-effort, mostrato così com'è: nessuna
+// conversione di valuta, nessuna normalizzazione — meglio un testo grezzo
+// onesto che un numero "pulito" ma sbagliato).
+// ---------------------------------------------------------------------------
+function extractPay(text) {
+  if (!text) return null;
+
+  // "£33,002 to £46,049 per annum" / "£33,002 - £46,049"
+  let m = text.match(/£\s?[\d,]+(?:\.\d+)?\s?(?:to|-|–)\s?£\s?[\d,]+(?:\.\d+)?(?:\s?per\s?\w+)?/i);
+  if (m) return m[0].trim();
+
+  // "$37,093/yr" / "$3,500 per month"
+  m = text.match(/\$\s?[\d,]+(?:\.\d+)?\s?(?:\/\s?\w+|per\s?\w+)?/i);
+  if (m) return m[0].trim();
+
+  // "€3,833.56" / "€ 2.200 al mese" / "EUR 2000"
+  m = text.match(/€\s?[\d.,]+\s?(?:\/\s?\w+|per\s?\w+|al mese|mensili)?/i);
+  if (m) return m[0].trim();
+  m = text.match(/EUR\s?[\d.,]+/i);
+  if (m) return m[0].trim();
+
+  // Italiano: "borsa di €X" / "importo della borsa: X euro" / "stipendio di X euro"
+  m = text.match(/(?:borsa(?:\s+di\s+studio)?|stipendio)[^.\n]{0,25}?(\d[\d.,]{2,})\s?(?:€|euro)/i);
+  if (m) return m[0].trim();
+
+  // Generico: "stipend of £X" / "salary of $X" già coperti sopra dai simboli;
+  // aggiungiamo "fully funded" come segnale debole (non è una cifra, ma è
+  // un'informazione utile e spesso è tutto ciò che l'annuncio dice).
+  if (/fully[\s-]funded/i.test(text)) return "Fully funded (importo non specificato)";
+
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Sorgente: jobs.ac.uk — feed RSS per area disciplinare
 // Esempio: https://www.jobs.ac.uk/jobs/chemistry/?format=rss
 // robots.txt di jobs.ac.uk non vieta questi percorsi (verificato manualmente).
@@ -209,7 +308,7 @@ async function fetchJobsAcUkSubject(subjectSlug) {
 // PhDportal, jobRxiv, bandi.mur.gov.it: siti senza API pubblica ma che il
 // loro robots.txt permette di consultare in modo automatico.
 // ---------------------------------------------------------------------------
-async function fetchHtmlListing(url, { hrefTest, baseUrl, minTitleLen = 8, sourceLabel }) {
+async function fetchHtmlListing(url, { hrefTest, baseUrl, minTitleLen = 8, sourceLabel, countryHint = null }) {
   const items = [];
   try {
     const res = await withRetry(
@@ -254,6 +353,7 @@ async function fetchHtmlListing(url, { hrefTest, baseUrl, minTitleLen = 8, sourc
         deadlineText,
         deadlineISO,
         source: sourceLabel,
+        countryHint,
       });
     });
   } catch (err) {
@@ -281,6 +381,7 @@ async function fetchAcademicTransferPhd() {
     hrefTest: (href) => /\/en\/jobs\/\d+\//.test(href),
     baseUrl: "https://www.academictransfer.com",
     sourceLabel: "academictransfer.com",
+    countryHint: "Netherlands", // fonte specifica per i Paesi Bassi
   });
 }
 
@@ -325,6 +426,7 @@ async function fetchBandiMur() {
     baseUrl: "https://bandi.mur.gov.it",
     minTitleLen: 4,
     sourceLabel: "bandi.mur.gov.it",
+    countryHint: "Italy",
   });
 }
 
@@ -352,6 +454,11 @@ function isExcluded(item, config) {
 function matchesCountry(item, config) {
   const countries = config.countries || [];
   if (countries.length === 0) return true; // nessun filtro paese impostato
+  // Preferisci il campo paese già estratto (più preciso); se assente, ripiega
+  // sulla ricerca testuale grezza (com'era prima) per non perdere risultati.
+  if (item.country) {
+    return countries.some((c) => norm(item.country).includes(norm(c)));
+  }
   const hay = norm(item.title + " " + item.description + " " + item.source);
   return countries.some((c) => hay.includes(norm(c)));
 }
@@ -388,11 +495,20 @@ function formatDeadlineShort(it) {
   return null;
 }
 
+function formatLocation(it) {
+  if (it.city && it.country) return `${it.city}, ${it.country}`;
+  if (it.country) return it.country;
+  return null;
+}
+
 // Messaggio ricco per una singola offerta (usato quando le novità sono poche)
 function buildItemMessage(it) {
   const lines = [it.source];
+  const loc = formatLocation(it);
+  if (loc) lines.push(`📍 ${loc}`);
   const dl = formatDeadlineShort(it);
   if (dl) lines.push(`Scadenza: ${dl}`);
+  if (it.payText) lines.push(`💰 ${it.payText}`);
   const snippet = (it.description || "").replace(/\s+/g, " ").trim();
   if (snippet) lines.push(snippet.slice(0, 220) + (snippet.length > 220 ? "…" : ""));
   lines.push(it.link);
@@ -446,11 +562,16 @@ async function main() {
   for (const item of allRaw) {
     if (isExcluded(item, config)) continue;
     if (!matchesPhdIndicator(item, config)) continue;
-    if (!matchesCountry(item, config)) continue;
-    const kws = matchedKeywords(item, config);
+
+    const { country, city } = deriveLocation(item);
+    const payText = extractPay(`${item.title} ${item.description}`);
+    const withLocation = { ...item, country, city, payText };
+
+    if (!matchesCountry(withLocation, config)) continue;
+    const kws = matchedKeywords(withLocation, config);
     if (kws.length === 0) continue;
     const id = makeId(item.link, item.title);
-    matched.push({ ...item, id, matchedKeywords: kws });
+    matched.push({ ...withLocation, id, matchedKeywords: kws });
   }
 
   console.log(`${matched.length} annunci corrispondono ai filtri (dottorato + materie + paese).`);
@@ -503,7 +624,8 @@ async function main() {
       .slice(0, 6)
       .map((it) => {
         const dl = formatDeadlineShort(it);
-        return `• ${it.title.slice(0, 80)} — ${it.source}${dl ? ` (scad. ${dl})` : ""}`;
+        const loc = formatLocation(it);
+        return `• ${it.title.slice(0, 70)}${loc ? ` (${loc})` : ""}${dl ? ` — scad. ${dl}` : ""}`;
       })
       .join("\n");
     await sendNtfy(topic, {

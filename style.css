@@ -190,6 +190,22 @@ main { margin-top: 18px; }
   margin: 0 0 8px;
 }
 
+.meta-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.meta-pill {
+  font-size: 0.76rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--card-border);
+  color: var(--text);
+}
+
 .card .source-line {
   font-size: 0.82rem;
   color: var(--text-dim);

@@ -14,6 +14,13 @@ Actions), nessun server da gestire.
   tramite [ntfy.sh](https://ntfy.sh) (servizio gratuito, open source) al tuo
   iPhone, dove avrai installato la app gratuita **ntfy** da App Store.
 
+Ogni annuncio, quando riconoscibile dal testo, mostra anche **luogo**
+(città/paese) e **importo indicativo della borsa/stipendio**: sono
+estratti automaticamente dal testo dell'annuncio (nessuna fonte li fornisce
+già strutturati), quindi compaiono solo quando il formato è riconoscibile —
+vedi la sezione "Limiti noti" per i dettagli. La lista si può filtrare
+anche per paese, non solo per materia.
+
 Non serve account Apple Developer, non serve un server sempre acceso: tutto
 gira sull'infrastruttura gratuita di GitHub.
 
@@ -105,8 +112,12 @@ a destra quando apri il file) — non serve programmare:
   post-doc o cattedre). Consigliato lasciarlo `true`.
 - **`sources.jobsAcUkSubjects`**: elenco di aree disciplinari di
   [jobs.ac.uk](https://www.jobs.ac.uk/feeds) da controllare (feed RSS
-  ufficiali). Elenco completo delle aree disponibili:
-  <https://www.jobs.ac.uk/feeds/subject-areas>
+  ufficiali). Usa esattamente lo slug che vedi nell'URL quando apri
+  <https://www.jobs.ac.uk/feeds/subject-areas> e clicchi un'area (es.
+  "Physical and Environmental Sciences" → slug
+  `physical-and-environmental-sciences`, con sotto-aree come `chemistry` o
+  `physics-and-astronomy` che funzionano anch'esse direttamente) — uno
+  slug scritto a mano/indovinato quasi sempre dà errore 404.
 - **`sources.academicPositionsFields`**: elenco di campi di
   [academicpositions.com](https://academicpositions.com/jobs) da
   controllare. Per trovare lo slug di un campo, vai sul sito, apri la
@@ -120,10 +131,13 @@ a destra quando apri il file) — non serve programmare:
   Paesi Bassi).
 - **`sources.phdPortalSubjects`**: elenco di materie di
   [phdportal.com](https://www.phdportal.com) da controllare (ambito
-  "Europe"). Per trovare lo slug di una materia, cerca su phdportal.com e
-  guarda l'URL (es. `.../search/phd/chemistry/europe` → slug `chemistry`).
-  **Attenzione**: qui si tratta più di *cataloghi di programmi* che di
-  bandi con scadenza precisa — cambiano meno spesso delle altre fonti.
+  "Europe"). **Disattivato di default (lista vuota `[]`)**: il sito
+  blocca le richieste automatiche con un errore 403 (protezione
+  anti-bot), non è un problema di configurazione — l'ho lasciato nel
+  codice nel caso tu voglia sperimentare, ma per ora non aspettarti che
+  funzioni. Se un giorno vuoi riprovare: trova lo slug di una materia su
+  phdportal.com guardando l'URL (es. `.../search/phd/chemistry/europe` →
+  slug `chemistry`).
 - **`sources.bandiMur`**: `true`/`false`. Se attivo, controlla
   [bandi.mur.gov.it](https://bandi.mur.gov.it), il portale ufficiale del
   Ministero italiano con **tutti** i bandi di dottorato di **tutti** gli
@@ -179,7 +193,15 @@ in poi, ricevi una notifica solo per le novità vere.
 - **jobs.ac.uk** copre in modo molto solido il Regno Unito e in modo
   discreto il resto d'Europa (molte università europee vi pubblicano
   annunci in inglese), ma non è esaustivo per bandi pubblicati solo in
-  lingua locale.
+  lingua locale. Il loro sistema di feed RSS ogni tanto risponde con
+  errore 500 anche su indirizzi corretti (sembra un problema
+  intermittente lato loro, riscontrato anche testando manualmente): lo
+  script ora ritenta automaticamente una volta dopo qualche secondo, ma
+  se il loro servizio è giù non c'è molto altro da fare — controlla i log
+  di un'esecuzione successiva, di solito si risolve da solo.
+- **phdportal.com** blocca attivamente le richieste automatiche (risposta
+  403), nonostante il loro `robots.txt` non lo vietasse esplicitamente:
+  è disattivato di default (`sources.phdPortalSubjects: []`).
 - **academicpositions.com**, **academictransfer.com**, **phdportal.com**,
   **jobrxiv.org** e **bandi.mur.gov.it** non offrono un feed ufficiale
   strutturato per queste ricerche: lo script legge la pagina HTML
@@ -198,6 +220,21 @@ in poi, ricevi una notifica solo per le novità vere.
   "Deadline", "Closes", e italiano "scade il"). Se il sito usa un formato
   diverso, l'annuncio compare comunque ma senza scadenza evidenziata —
   meglio non mostrare una data che rischiare di mostrarne una sbagliata.
+- **Il paese/città (📍)** viene riconosciuto cercando nel testo
+  dell'annuncio il nome di uno dei paesi in un elenco predefinito
+  (soprattutto europei). Per AcademicTransfer e bandi.mur.gov.it il paese
+  è impostato automaticamente (rispettivamente Paesi Bassi e Italia,
+  visto che sono fonti mono-paese), per le altre fonti è dedotto dal
+  testo. La città è una stima ancora più approssimativa (cerca "Città,
+  Paese" nel testo): se non è chiara, viene lasciata vuota invece di
+  rischiare di mostrare qualcosa di sbagliato. Il filtro per paese in
+  cima alla pagina compare solo quando l'app ha riconosciuto almeno due
+  paesi diversi tra gli annunci raccolti.
+- **La paga indicativa (💰)** è anch'essa estratta dal testo (simboli
+  £/$/€, o "fully funded" quando non c'è una cifra) e mostrata così
+  com'è, **senza conversione di valuta** — confrontare cifre in valute
+  diverse va fatto a occhio. Se l'annuncio non menziona un importo da
+  nessuna parte, semplicemente non compare nulla.
 - **EURAXESS** e **FindAPhD** restano gli unici grandi esclusi: il loro
   `robots.txt` chiede esplicitamente ai crawler di non raschiare le
   pagine di ricerca/annuncio, e ho preferito rispettarlo. Restano comunque
