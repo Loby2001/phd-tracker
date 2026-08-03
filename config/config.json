@@ -30,17 +30,19 @@
   "sources": {
     "jobsAcUkSubjects": [
       "chemistry",
-      "biological-sciences",
+      "materials-science",
       "physics-and-astronomy",
+      "environmental-sciences",
+      "biological-sciences",
       "engineering-and-technology",
-      "computer-science-and-informatics",
+      "computer-sciences",
       "mathematics-and-statistics",
-      "medicine-dentistry-and-health",
-      "environment-earth-and-marine-sciences",
+      "health-and-medical",
       "psychology",
-      "social-sciences",
+      "social-sciences-and-social-care",
       "economics",
-      "humanities"
+      "historical-and-philosophical-studies",
+      "languages-literature-and-culture"
     ],
     "academicPositionsFields": [
       "chemistry-organic-chemistry",
@@ -57,18 +59,8 @@
 
     "academicTransfer": true,
 
-    "phdPortalSubjects": [
-      "chemistry",
-      "physics",
-      "biology",
-      "medicine",
-      "engineering",
-      "computer-science",
-      "mathematics",
-      "environmental-science",
-      "materials-science",
-      "pharmacy"
-    ],
+    "phdPortalSubjectsDisabledReason": "Disattivato di default: phdportal.com blocca le richieste automatiche con un 403 (protezione anti-bot), non è colpa degli slug. Lascialo vuoto a meno che tu non riesca a farlo funzionare diversamente.",
+    "phdPortalSubjects": [],
 
     "bandiMur": true,
 

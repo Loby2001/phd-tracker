@@ -69,6 +69,28 @@ async function fetchWithTimeout(url, opts = {}) {
   }
 }
 
+// Ritenta una volta, dopo una pausa, solo per errori transitori (5xx, timeout,
+// errori di rete) — non ha senso ritentare un 404/403, che non cambierà.
+async function withRetry(fn, { retries = 1, delayMs = 2500, isRetryable } = {}) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const retryable = isRetryable ? isRetryable(err) : true;
+      if (attempt >= retries || !retryable) throw err;
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+  throw lastErr;
+}
+
+function is5xxOrNetworkError(err) {
+  const msg = String(err && err.message).toLowerCase();
+  return /50\d|timeout|network|econn|abort/.test(msg);
+}
+
 function makeId(link, title) {
   const base = (link || title || "").trim().toLowerCase();
   // hash semplice e stabile, senza dipendenze esterne
@@ -159,7 +181,7 @@ async function fetchJobsAcUkSubject(subjectSlug) {
   const url = `https://www.jobs.ac.uk/jobs/${encodeURIComponent(subjectSlug)}/?format=rss`;
   const items = [];
   try {
-    const feed = await rssParser.parseURL(url);
+    const feed = await withRetry(() => rssParser.parseURL(url), { isRetryable: is5xxOrNetworkError });
     for (const it of feed.items || []) {
       const description = it.contentSnippet || it.content || "";
       const { deadlineText, deadlineISO } = extractDeadline(description);
@@ -190,7 +212,16 @@ async function fetchJobsAcUkSubject(subjectSlug) {
 async function fetchHtmlListing(url, { hrefTest, baseUrl, minTitleLen = 8, sourceLabel }) {
   const items = [];
   try {
-    const res = await fetchWithTimeout(url);
+    const res = await withRetry(
+      async () => {
+        const r = await fetchWithTimeout(url);
+        if (!r.ok && r.status >= 500) {
+          throw new Error(`HTTP ${r.status}`); // 5xx: vale la pena ritentare
+        }
+        return r;
+      },
+      { isRetryable: is5xxOrNetworkError }
+    );
     if (!res.ok) {
       console.warn(`⚠️  ${sourceLabel}: HTTP ${res.status} su ${url}`);
       return items;
