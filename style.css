@@ -140,6 +140,26 @@ main { margin-top: 18px; }
   position: relative;
 }
 
+.card.card-interested {
+  border-color: var(--new-badge);
+}
+
+.card.card-dismissed {
+  opacity: 0.55;
+}
+
+.card.card-dismissed:focus-within,
+.card.card-dismissed:hover {
+  opacity: 0.9;
+}
+
+.dismissed-note {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin: 0 0 8px;
+}
+
 .card .row-top {
   display: flex;
   justify-content: space-between;
@@ -225,6 +245,42 @@ main { margin-top: 18px; }
   border-radius: 999px;
   background: var(--chip-bg);
   color: var(--accent-2);
+}
+
+.interest-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.interest-btn {
+  flex: 1;
+  font-size: 0.8rem;
+  padding: 7px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: var(--bg-elev);
+  color: var(--text-dim);
+  cursor: pointer;
+  text-align: center;
+}
+
+.interest-btn:active {
+  transform: scale(0.98);
+}
+
+.interest-btn.interest-yes.active {
+  background: var(--new-badge);
+  border-color: var(--new-badge);
+  color: #06281a;
+  font-weight: 600;
+}
+
+.interest-btn.interest-no.active {
+  background: #e0762c;
+  border-color: #e0762c;
+  color: #2a1200;
+  font-weight: 600;
 }
 
 .card .footer-line {

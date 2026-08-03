@@ -157,7 +157,36 @@ automatico (entro 6 ore), oppure puoi forzarlo subito (punto 7).
 
 ---
 
-## 6. Cambiare la frequenza di controllo
+## 6. Segnare "mi interessa" / "non interessa"
+
+Ogni annuncio in elenco ha due pulsanti, 👍 **Interessa** e 👎 **Non
+interessa**:
+
+- Toccando 👍 l'annuncio viene evidenziato (bordo verde) e salito in cima
+  all'elenco.
+- Toccando 👎 l'annuncio viene contrassegnato come scartato: appare
+  visivamente sbiadito e scivola in fondo all'elenco, ma **non viene mai
+  nascosto o rimosso automaticamente** — resta sempre lì, apribile e
+  ripristinabile in qualsiasi momento.
+- Toccando di nuovo lo stesso pulsante annulli la scelta e l'annuncio
+  torna "da valutare".
+
+Sotto ai filtri per materia/paese trovi anche una riga di filtro per
+stato — **Tutte**, **Da valutare**, **Mi interessano**, **Scartate** —
+utile per rivedere in un colpo solo tutto quello che hai scartato (per
+esempio se vuoi ricontrollarlo più avanti). Il filtro di default è
+"Tutte", quindi nulla sparisce mai dalla vista a meno che tu non scelga
+tu stesso di filtrare.
+
+Questa scelta è salvata solo sul tuo dispositivo (`localStorage` del
+browser), non nel repository: se apri l'app da un altro telefono o
+cancelli i dati del browser, le etichette 👍/👎 ripartono da zero. Non
+viene toccato l'elenco `data/listings.json` che viene aggiornato dal
+controllo automatico.
+
+---
+
+## 7. Cambiare la frequenza di controllo
 
 Modifica la riga `cron` in `.github/workflows/check.yml`. Esempi:
 
@@ -170,7 +199,7 @@ all'ora italiana estiva.)
 
 ---
 
-## 7. Testare subito, senza aspettare
+## 8. Testare subito, senza aspettare
 
 Vai su **Actions** (in alto nel repository) → clicca sul workflow
 "Controllo bandi dottorato" → **Run workflow** → **Run workflow**. Parte
@@ -183,7 +212,7 @@ in poi, ricevi una notifica solo per le novità vere.
 
 ---
 
-## 8. Limiti noti (onestamente)
+## 9. Limiti noti (onestamente)
 
 - **EURAXESS** e **FindAPhD** non vengono controllati automaticamente: il
   loro `robots.txt` chiede esplicitamente ai crawler di non raschiare le
@@ -242,7 +271,7 @@ in poi, ricevi una notifica solo per le novità vere.
 
 ---
 
-## 9. Struttura del progetto
+## 10. Struttura del progetto
 
 ```
 phd-tracker/
@@ -266,7 +295,7 @@ phd-tracker/
 
 ---
 
-## 10. Aggiungere l'app alla schermata Home (iPhone)
+## 11. Aggiungere l'app alla schermata Home (iPhone)
 
 1. Apri `https://TUO-USERNAME.github.io/phd-tracker/` in **Safari** (deve
    essere Safari, non Chrome, perché su iOS solo Safari può installare

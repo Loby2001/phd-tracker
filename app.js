@@ -6,9 +6,43 @@ const state = {
   lastRun: null,
   activeChip: localStorage.getItem("phdtracker.chip") || "Tutte",
   activeCountry: localStorage.getItem("phdtracker.country") || "Tutti i paesi",
+  activeStatus: localStorage.getItem("phdtracker.status") || "Tutte",
   search: localStorage.getItem("phdtracker.search") || "",
   onlyNew: localStorage.getItem("phdtracker.onlyNew") === "1",
+  interest: loadInterest(),
 };
+
+// Stato interesse per annuncio: { [id]: "yes" | "no" }, salvato in localStorage.
+// Non viene mai rimosso automaticamente un annuncio scartato: resta sempre
+// consultabile tramite il filtro "Scartate".
+function loadInterest() {
+  try {
+    const raw = localStorage.getItem("phdtracker.interest");
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveInterest() {
+  localStorage.setItem("phdtracker.interest", JSON.stringify(state.interest));
+}
+
+function getInterest(id) {
+  return state.interest[id] || null; // null = "da valutare"
+}
+
+function setInterest(id, value) {
+  // Cliccare di nuovo la stessa azione la annulla (torna a "da valutare").
+  if (state.interest[id] === value) {
+    delete state.interest[id];
+  } else {
+    state.interest[id] = value;
+  }
+  saveInterest();
+  renderStatusChips();
+  renderList();
+}
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -110,12 +144,41 @@ function renderCountryChips() {
   }
 }
 
+const STATUS_OPTIONS = ["Tutte", "Da valutare", "Mi interessano", "Scartate"];
+
+function renderStatusChips() {
+  const row = $("#statusChipRow");
+  if (!row) return;
+  row.innerHTML = "";
+  for (const opt of STATUS_OPTIONS) {
+    const el = document.createElement("div");
+    let count = 0;
+    if (opt === "Mi interessano") count = state.listings.filter((it) => getInterest(it.id) === "yes").length;
+    else if (opt === "Scartate") count = state.listings.filter((it) => getInterest(it.id) === "no").length;
+    el.className = "chip" + (opt === state.activeStatus ? " active" : "");
+    el.textContent = count && opt !== "Tutte" && opt !== "Da valutare" ? `${opt} (${count})` : opt;
+    el.addEventListener("click", () => {
+      state.activeStatus = opt;
+      localStorage.setItem("phdtracker.status", opt);
+      renderStatusChips();
+      renderList();
+    });
+    row.appendChild(el);
+  }
+}
+
 function matchesFilters(item) {
   if (state.activeChip !== "Tutte") {
     if (!(item.matchedKeywords || []).includes(state.activeChip)) return false;
   }
   if (state.activeCountry !== "Tutti i paesi") {
     if (item.country !== state.activeCountry) return false;
+  }
+  if (state.activeStatus !== "Tutte") {
+    const interest = getInterest(item.id);
+    if (state.activeStatus === "Da valutare" && interest !== null) return false;
+    if (state.activeStatus === "Mi interessano" && interest !== "yes") return false;
+    if (state.activeStatus === "Scartate" && interest !== "no") return false;
   }
   if (state.onlyNew && daysAgo(item.firstSeen) > 7) return false;
   if (state.search.trim()) {
@@ -125,8 +188,20 @@ function matchesFilters(item) {
   return true;
 }
 
+function interestRank(item) {
+  // Le offerte "mi interessa" salgono in cima, quelle scartate scendono in
+  // fondo (ma restano presenti in elenco, mai rimosse), quelle da valutare
+  // restano nell'ordine naturale.
+  const v = getInterest(item.id);
+  if (v === "yes") return 0;
+  if (v === "no") return 2;
+  return 1;
+}
+
 function sortListings(items) {
   return [...items].sort((a, b) => {
+    const ir = interestRank(a) - interestRank(b);
+    if (ir !== 0) return ir;
     const ad = a.deadlineISO ? new Date(a.deadlineISO).getTime() : Infinity;
     const bd = b.deadlineISO ? new Date(b.deadlineISO).getTime() : Infinity;
     if (ad !== bd) return ad - bd; // scadenze più vicine prima
@@ -179,7 +254,9 @@ function renderList() {
 
   for (const item of filtered) {
     const card = document.createElement("div");
-    card.className = "card";
+    const interest = getInterest(item.id);
+    card.className = "card" + (interest === "no" ? " card-dismissed" : interest === "yes" ? " card-interested" : "");
+    card.dataset.id = item.id;
 
     const isNew = daysAgo(item.firstSeen) <= 3;
     const tags = (item.matchedKeywords || []).filter((k) => !k.startsWith("(nessun filtro"));
@@ -210,6 +287,15 @@ function renderList() {
           : ""
       }
       ${snippet ? `<p class="snippet">${escapeHtml(snippet.slice(0, 200))}${snippet.length > 200 ? "…" : ""}</p>` : ""}
+      ${interest === "no" ? '<div class="dismissed-note">Segnato come "non interessa" — resta comunque disponibile qui.</div>' : ""}
+      <div class="interest-row">
+        <button type="button" class="interest-btn interest-yes${interest === "yes" ? " active" : ""}" data-action="yes">
+          👍 ${interest === "yes" ? "Ti interessa" : "Interessa"}
+        </button>
+        <button type="button" class="interest-btn interest-no${interest === "no" ? " active" : ""}" data-action="no">
+          👎 ${interest === "no" ? "Scartata" : "Non interessa"}
+        </button>
+      </div>
       <div class="footer-line">
         <span>${deadlineLine ? escapeHtml(deadlineLine) : `Trovato il ${formatDate(item.firstSeen)}`}</span>
         <a href="${item.link}" target="_blank" rel="noopener">Apri annuncio →</a>
@@ -274,6 +360,16 @@ function bindControls() {
     localStorage.setItem("phdtracker.onlyNew", state.onlyNew ? "1" : "0");
     renderList();
   });
+
+  // Delega degli eventi sui pulsanti 👍/👎: le card vengono ricreate ad ogni
+  // renderList(), quindi il listener va agganciato al contenitore #list.
+  $("#list").addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".interest-btn");
+    if (!btn) return;
+    const card = ev.target.closest(".card");
+    if (!card) return;
+    setInterest(card.dataset.id, btn.dataset.action);
+  });
 }
 
 async function init() {
@@ -281,6 +377,7 @@ async function init() {
   renderMeta();
   renderChips();
   renderCountryChips();
+  renderStatusChips();
   bindControls();
   renderList();
   renderManualLinks();
