@@ -335,7 +335,20 @@ risultati nuovi della ricerca salvata in un'unica email) — lo script legge
 l'intero elenco puntato riga per riga e cataloga **ognuno** degli annunci
 trovati, non solo il primo; verificato leggendo l'esempio reale caricato
 (4 annunci distinti in un'unica email, estratti tutti correttamente) e
-ri-confermato con un test dedicato. Per FindAPhD il template esatto
+ri-confermato con un test dedicato.
+
+**Filtro materia non applicato agli annunci via email**: a differenza
+degli annunci raschiati dai siti, quelli via email hanno solo il titolo,
+senza descrizione estesa — richiedere che una parola chiave configurata
+compaia lì per esteso scartava quasi tutto, anche annunci in tema (es.
+"organic **electronics**" invece di "organic **chemistry**"). Dato che
+questi annunci sono già filtrati a monte dalla ricerca salvata impostata
+direttamente sul sito EURAXESS/FindAPhD, per loro il filtro materia locale
+(`keywords` in `config.json`) non si applica più: passano comunque il
+filtro "è un dottorato" (`phdIndicatorWords`) e le parole da escludere
+(`excludeKeywords`, es. "postdoc"). Verificato con l'esempio reale: dei 4
+annunci nella mail, i 2 che erano davvero posizioni di dottorato ora
+passano, i 2 post-dottorato restano esclusi come previsto. Per FindAPhD il template esatto
 non è ancora stato verificato: l'estrazione resta quella generica (cerca i
 link il cui indirizzo corrisponde al formato stabile di un singolo annuncio,
 `findaphd.com/phds/project/...`) — non estrae automaticamente scadenza o

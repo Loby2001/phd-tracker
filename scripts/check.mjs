@@ -1109,7 +1109,21 @@ function matchesPhdIndicator(item, config) {
   return (config.phdIndicatorWords || []).some((w) => hay.includes(norm(w)));
 }
 
+// Gli annunci che arrivano via alert email (EURAXESS, FindAPhD) hanno solo
+// un titolo breve, senza descrizione estesa: richiedere che una delle
+// parole chiave configurate compaia lì letteralmente scarta quasi tutto,
+// anche annunci in tema, perché il titolo raramente la contiene per
+// esteso (es. "organic electronics" invece di "organic chemistry"). Dato
+// che questi annunci sono già filtrati a monte dalla ricerca salvata che
+// l'utente ha impostato direttamente sul sito (EURAXESS/FindAPhD), qui non
+// si applica il filtro materia locale — resta comunque il filtro "è un
+// dottorato" e le parole da escludere (es. "postdoc").
+function isMailAlertItem(item) {
+  return MAIL_PROFILES.some((p) => p.label === item.source);
+}
+
 function matchedKeywords(item, config) {
+  if (isMailAlertItem(item)) return ["(alert email: già filtrato dalla ricerca salvata sul sito)"];
   const hay = norm(item.title + " " + item.description + " " + item.source);
   const kws = config.keywords || [];
   if (kws.length === 0) return ["(nessun filtro: tutte le materie)"];
