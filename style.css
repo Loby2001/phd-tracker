@@ -399,6 +399,58 @@ section.manual h3 {
 .manual-link .name { font-weight: 600; }
 .manual-link .note { display: block; font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
 
+.map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.map-header h3 { margin: 0; }
+
+.map-theme-toggle {
+  flex: none;
+  font-size: 0.76rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--card-border);
+  background: var(--bg-elev);
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.map-theme-toggle:active {
+  transform: scale(0.97);
+}
+
+.interest-map {
+  height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  background: var(--bg-elev);
+}
+
+.interest-map .leaflet-popup-content-wrapper {
+  background: var(--card);
+  color: var(--text);
+  border-radius: 10px;
+}
+
+.interest-map .leaflet-popup-content {
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.interest-map .leaflet-popup-content a {
+  color: var(--accent);
+}
+
+.interest-map .leaflet-popup-tip {
+  background: var(--card);
+}
+
 .prefs-note {
   font-size: 0.8rem;
   color: var(--text-dim);

@@ -102,7 +102,12 @@ a destra quando apri il file) — non serve programmare:
 - **`keywords`**: elenco di parole/frasi da cercare (case-insensitive).
   Lascialo vuoto `[]` per non filtrare per materia (prendi tutti i
   dottorati, di ogni campo).
-- **`excludeKeywords`**: parole che, se presenti, scartano l'annuncio.
+- **`excludeKeywords`**: parole che, se presenti, scartano l'annuncio. Di
+  default include già `"postdoctoral"`, `"post-doctoral"`, `"post doctoral"`
+  e `"postdoc"`, per evitare che compaiano posizioni da post-dottorato
+  insieme ai dottorati veri e propri (capita perché alcuni annunci di
+  post-doc citano comunque la parola "PhD" nel testo, es. "PhD required").
+  Aggiungine altre allo stesso modo se noti altri annunci fuori tema.
 - **`countries`**: elenco di paesi/città da richiedere (es. `["Spain",
   "Netherlands", "Italy"]`, in inglese perché quasi tutti gli annunci sono
   in inglese). Lascialo vuoto `[]` per non filtrare per paese (tutta
@@ -153,7 +158,7 @@ a destra quando apri il file) — non serve programmare:
   query per ciascuna parola in `keywords` + "phd".
 
 Ogni modifica al file viene applicata dal **prossimo** controllo
-automatico (entro 6 ore), oppure puoi forzarlo subito (punto 11).
+automatico (entro 6 ore), oppure puoi forzarlo subito (punto 12).
 
 ---
 
@@ -196,14 +201,14 @@ tu stesso questi file a mano, ricordati di incrementare quel numero, o il
 tuo telefono continuerà a vedere la versione vecchia. Dopo aver caricato i
 file su GitHub, chiudi del tutto l'app (o Safari) e riaprila: nel giro di
 pochi secondi dovrebbe aggiornarsi da sola. Se proprio non si aggiorna,
-rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 14).
+rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 15).
 
 ---
 
 ## 7. Alert email nativi (EURAXESS, FindAPhD) senza usare la tua mail personale
 
 EURAXESS e FindAPhD non si possono raschiare automaticamente (il loro
-`robots.txt` lo vieta, vedi punto 12 "Limiti noti"), ma entrambi offrono un
+`robots.txt` lo vieta, vedi punto 13 "Limiti noti"), ma entrambi offrono un
 loro alert nativo via email quando esce un nuovo annuncio che corrisponde
 a una tua ricerca salvata. Per farli confluire nella stessa app e nella
 stessa notifica ntfy di tutto il resto — invece di controllare a mano una
@@ -314,23 +319,33 @@ in:
 ```
 
 Dal controllo automatico successivo (entro 6 ore, o forza subito col
-punto 11), lo script si collega alla casella, legge le email non lette che
+punto 12), lo script si collega alla casella, legge le email non lette che
 contengono link a un annuncio EURAXESS o FindAPhD, le fa comparire
 nell'app esattamente come le altre fonti (con notifica ntfy inclusa), e le
 segna come lette per non rileggerle al giro successivo.
 
-**Limiti onesti di questa integrazione**: non conosco il template esatto
-delle email di alert di EURAXESS/FindAPhD (non è documentato
-pubblicamente), quindi l'estrazione cerca semplicemente, dentro l'email,
-i link il cui indirizzo corrisponde al formato stabile della pagina di un
-singolo annuncio su ciascun sito (es. `euraxess.ec.europa.eu/jobs/123456`
-o `findaphd.com/phds/project/...`) — non estrae automaticamente scadenza o
-paga da queste email (compariranno senza quei dettagli). Se dopo averla
-attivata non vedi comparire nulla pur ricevendo le email, controlla i log
-dell'esecuzione su GitHub Actions: se il formato dell'email è cambiato o è
-diverso da quanto previsto, fammi vedere un log (o incolla — con dati
-anonimizzati se preferisci — il contenuto di un'email di esempio) così
-posso aggiustare l'estrazione.
+**Formato EURAXESS confermato**: dopo aver visto un esempio reale di email
+"New results for your saved search" di EURAXESS, l'estrazione ora è
+specifica per il loro formato (un elenco puntato con il titolo
+dell'annuncio seguito dalla URL sulla riga successiva) e riconosce
+correttamente ogni annuncio con titolo e link giusti, ignorando i link di
+gestione/disiscrizione in fondo all'email. Per FindAPhD il template esatto
+non è ancora stato verificato: l'estrazione resta quella generica (cerca i
+link il cui indirizzo corrisponde al formato stabile di un singolo annuncio,
+`findaphd.com/phds/project/...`) — non estrae automaticamente scadenza o
+paga da queste email (compariranno senza quei dettagli). Se dopo aver
+attivato FindAPhD non vedi comparire nulla pur ricevendo le email, mandami
+un esempio (anche con dati anonimizzati) così sistemo l'estrazione anche
+per quel formato.
+
+**Attenzione all'indirizzo email usato per il "save search"**: l'alert va
+impostato sull'indirizzo dedicato (es. `tuonome.phdalerts@gmx.com`), **non**
+sulla tua email personale — altrimenti l'email arriva dove lo script non
+legge mai, e sembrerà che "non funzioni" anche se in realtà è tutto
+configurato correttamente. Se hai già impostato un alert e non sei
+sicuro su quale indirizzo arrivi, vai su
+[euraxess.ec.europa.eu/my/saved-searches](https://euraxess.ec.europa.eu/my/saved-searches)
+e controlla/correggi l'indirizzo associato alla ricerca salvata.
 
 ---
 
@@ -365,9 +380,50 @@ aggiungerla tu stesso all'elenco `CITIES` in `scripts/check.mjs` (formato
 `["NomeCittà", "NomePaese"]`, il nome del paese deve corrispondere a uno di
 quelli usati altrove nel file, es. "Italy", "Netherlands").
 
+**Università/enti noti** (`scripts/check.mjs`, costante `INSTITUTIONS`):
+molti annunci — soprattutto quelli di reti MSCA/consorzi — nominano
+l'ateneo o l'ente (es. "Sapienza", "ETH Zürich", "Sorbonne", "CERN", la
+**Helmholtz Association**) ma non
+sempre la città in modo esplicito. Un secondo elenco di circa 50 istituzioni
+europee comuni riconduce questi nomi alla città (o al paese, se l'ente non
+ha una sede unica) corrispondente, e si somma a quelle già trovate tramite
+`CITIES` — utile in particolare per i dottorati condivisi dove magari una
+sede è nominata per città e un'altra solo per nome di ateneo. Anche questo
+elenco è ampliabile allo stesso modo: aggiungi una riga `["NomeIstituzione",
+"Città", "Paese"]`.
+
 ---
 
-## 9. Esportare e importare le preferenze (interesse, filtri)
+## 9. Mappa dei dottorati che ti interessano
+
+In fondo alla pagina, sopra "Fonti da controllare manualmente", trovi una
+**mappa del mondo minimale** (in stile chiaro o scuro, con un pulsante per
+alternare) con un segnaposto per ogni annuncio segnato come **"Ti
+interessa"** (vedi punto 6) e per cui è stato riconosciuto un luogo — città
+o, quando non c'è una città precisa, almeno il paese (es. gli annunci di
+reti/associazioni senza una sede unica, come la **Helmholtz Association**,
+mostrano un segnaposto al centro della Germania).
+
+Toccando un segnaposto si apre un fumetto con titolo, luogo e un link che
+apre l'annuncio originale in una nuova scheda — la mappa non serve solo per
+farsi un'idea geografica dei dottorati, ma anche come scorciatoia per
+tornarci sopra rapidamente. Se non hai ancora segnato nessun annuncio come
+"Ti interessa" (o nessuno di quelli segnati ha un luogo riconosciuto),
+compare un messaggio invece della mappa vuota.
+
+**Come funziona tecnicamente**: la mappa usa [Leaflet](https://leafletjs.com)
+(libreria open source, caricata da CDN) con le mappe di sfondo minimali di
+[CARTO](https://carto.com) (varianti chiaro/scuro, gratuite e senza chiave
+API per un uso personale come questo). Le coordinate di ogni luogo sono
+approssimative — città/paese, non l'indirizzo esatto dell'ateneo — pensate
+solo per posizionare un segnaposto su una mappa, non per navigazione di
+precisione. **Richiede una connessione a Internet** per caricare la
+libreria e le mappe di sfondo (come già il resto dei dati dell'app): offline
+compare il messaggio informativo al posto della mappa, senza errori.
+
+---
+
+## 10. Esportare e importare le preferenze (interesse, filtri)
 
 In fondo alla pagina, sezione **"Preferenze (interesse, filtri)"**, trovi
 due pulsanti:
@@ -399,7 +455,7 @@ nulla.
 
 ---
 
-## 10. Cambiare la frequenza di controllo
+## 11. Cambiare la frequenza di controllo
 
 Modifica la riga `cron` in `.github/workflows/check.yml`. Esempi:
 
@@ -412,7 +468,7 @@ all'ora italiana estiva.)
 
 ---
 
-## 11. Testare subito, senza aspettare
+## 12. Testare subito, senza aspettare
 
 Vai su **Actions** (in alto nel repository) → clicca sul workflow
 "Controllo bandi dottorato" → **Run workflow** → **Run workflow**. Parte
@@ -425,7 +481,7 @@ in poi, ricevi una notifica solo per le novità vere.
 
 ---
 
-## 12. Limiti noti (onestamente)
+## 13. Limiti noti (onestamente)
 
 - **EURAXESS** e **FindAPhD** non vengono raschiati direttamente dal sito:
   il loro `robots.txt` chiede esplicitamente ai crawler di non farlo, e ho
@@ -463,31 +519,31 @@ in poi, ricevi una notifica solo per le novità vere.
   "Deadline", "Closes", e italiano "scade il"). Se il sito usa un formato
   diverso, l'annuncio compare comunque ma senza scadenza evidenziata —
   meglio non mostrare una data che rischiare di mostrarne una sbagliata.
-- **Il paese/città (📍)** viene riconosciuto cercando nel testo
-  dell'annuncio il nome di uno dei paesi in un elenco predefinito
-  (soprattutto europei). Per AcademicTransfer e bandi.mur.gov.it il paese
-  è impostato automaticamente (rispettivamente Paesi Bassi e Italia,
-  visto che sono fonti mono-paese), per le altre fonti è dedotto dal
-  testo. La città è una stima ancora più approssimativa (cerca "Città,
-  Paese" nel testo): se non è chiara, viene lasciata vuota invece di
-  rischiare di mostrare qualcosa di sbagliato. Il filtro per paese in
-  cima alla pagina compare solo quando l'app ha riconosciuto almeno due
-  paesi diversi tra gli annunci raccolti.
+- **Il paese/città** viene riconosciuto cercando nel testo dell'annuncio le
+  città dell'elenco `CITIES` e le istituzioni dell'elenco `INSTITUTIONS`
+  (vedi punto 8), con il vecchio metodo "Città, Paese" come ultima riserva
+  se non trova corrispondenze in nessuno dei due. Per AcademicTransfer e
+  bandi.mur.gov.it il paese è comunque impostato automaticamente
+  (rispettivamente Paesi Bassi e Italia, fonti mono-paese). Se un annuncio
+  non nomina né una città né un'istituzione riconosciuta, il luogo resta
+  vuoto invece di rischiare di mostrare qualcosa di sbagliato. Il filtro
+  per paese nel menu Filtri compare solo quando l'app ha riconosciuto
+  almeno due paesi diversi tra gli annunci raccolti.
 - **La paga indicativa (💰)** è anch'essa estratta dal testo (simboli
   £/$/€, o "fully funded" quando non c'è una cifra) e mostrata così
   com'è, **senza conversione di valuta** — confrontare cifre in valute
   diverse va fatto a occhio. Se l'annuncio non menziona un importo da
   nessuna parte, semplicemente non compare nulla.
-- **Gli alert email di EURAXESS/FindAPhD (punto 7)**, se attivati, vengono
-  letti in modo generico (cerco solo link che puntano a un singolo
-  annuncio), perché non conosco il template esatto delle loro email: non
-  estraggono scadenza o paga, e se il formato dell'email risultasse molto
-  diverso dal previsto potrebbero non restituire nulla — controlla i log
-  di GitHub Actions dopo averli attivati.
+- **Gli alert email (punto 7)**: quelli di EURAXESS sono riconosciuti in
+  modo specifico sul loro formato reale (titolo + link). Quelli di
+  FindAPhD, il cui formato non è ancora stato verificato su un esempio
+  reale, restano letti in modo generico (cerco solo link che puntano a un
+  singolo annuncio) e non estraggono scadenza o paga — se non restituiscono
+  nulla dopo averli attivati, controlla i log di GitHub Actions.
 
 ---
 
-## 13. Struttura del progetto
+## 14. Struttura del progetto
 
 ```
 phd-tracker/
@@ -511,7 +567,7 @@ phd-tracker/
 
 ---
 
-## 14. Aggiungere l'app alla schermata Home (iPhone)
+## 15. Aggiungere l'app alla schermata Home (iPhone)
 
 1. Apri `https://TUO-USERNAME.github.io/phd-tracker/` in **Safari** (deve
    essere Safari, non Chrome, perché su iOS solo Safari può installare

@@ -17,6 +17,7 @@
 <link rel="icon" href="icons/icon-192.png" />
 
 <link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 </head>
 <body>
 <div class="wrap">
@@ -66,6 +67,18 @@
     Nessuna offerta trovata con questi filtri.<br />Prova ad allargare la ricerca.
   </div>
 
+  <section class="manual" id="interestMapSection">
+    <div class="map-header">
+      <h3>Dottorati che ti interessano — mappa</h3>
+      <button type="button" id="mapThemeToggle" class="map-theme-toggle">Tema chiaro</button>
+    </div>
+    <div id="interestMap" class="interest-map"></div>
+    <p id="interestMapEmpty" class="prefs-note" style="display:none;">
+      Segna come "Interessa" almeno un annuncio con un luogo riconosciuto
+      per vederlo qui sulla mappa.
+    </p>
+  </section>
+
   <section class="manual" id="manualSection">
     <h3>Fonti da controllare manualmente</h3>
     <div id="manualLinks"></div>
@@ -93,7 +106,8 @@
 
 </div>
 
-<script src="app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+<script src="app.js" defer></script>
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {

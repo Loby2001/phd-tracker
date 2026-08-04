@@ -427,10 +427,115 @@ function extractCities(text) {
   return found.slice(0, 6);
 }
 
+// ---------------------------------------------------------------------------
+// Università / enti — molti annunci (soprattutto quelli di reti MSCA o
+// consorzi) nominano l'ateneo o l'ente di ricerca ma non la città in modo
+// esplicito nel testo (es. "Sapienza", "ETH Zürich", "Sorbonne"). Questo
+// elenco riconduce il nome dell'istituzione alla città (o, quando l'ente non
+// ha una sede unica, almeno al paese) in cui si trova, così l'etichetta del
+// luogo compare comunque. Non è un elenco esaustivo di tutte le università
+// europee: sono quelle più comuni nelle bacheche accademiche/scientifiche,
+// ampliabile in futuro se emergono altri nomi ricorrenti.
+const INSTITUTIONS = [
+  ["Sapienza", "Rome", "Italy"], ["Politecnico di Milano", "Milan", "Italy"],
+  ["Politecnico di Torino", "Turin", "Italy"], ["Università Bocconi", "Milan", "Italy"],
+  ["Bocconi", "Milan", "Italy"], ["Scuola Normale Superiore", "Pisa", "Italy"],
+  ["Sant'Anna", "Pisa", "Italy"], ["IIT Genova", "Genoa", "Italy"],
+  ["Istituto Italiano di Tecnologia", "Genoa", "Italy"], ["Ca' Foscari", "Venice", "Italy"],
+  ["San Raffaele", "Milan", "Italy"], ["Vita-Salute", "Milan", "Italy"],
+  ["ETH Zurich", "Zurich", "Switzerland"], ["ETH Zürich", "Zurich", "Switzerland"],
+  ["EPFL", "Lausanne", "Switzerland"], ["Imperial College London", "London", "United Kingdom"],
+  ["Imperial College", "London", "United Kingdom"], ["University College London", "London", "United Kingdom"],
+  ["King's College London", "London", "United Kingdom"], ["London School of Economics", "London", "United Kingdom"],
+  ["Sorbonne", "Paris", "France"], ["École Polytechnique", "Paris", "France"],
+  ["Ecole Polytechnique", "Paris", "France"], ["Sciences Po", "Paris", "France"],
+  ["Institut Pasteur", "Paris", "France"], ["Ludwig-Maximilians-Universität", "Munich", "Germany"],
+  ["Ludwig Maximilian University", "Munich", "Germany"], ["LMU Munich", "Munich", "Germany"],
+  ["Technical University of Munich", "Munich", "Germany"],
+  ["Humboldt-Universität", "Berlin", "Germany"], ["Humboldt University", "Berlin", "Germany"],
+  ["Freie Universität Berlin", "Berlin", "Germany"], ["Charité", "Berlin", "Germany"],
+  ["KU Leuven", "Leuven", "Belgium"], ["Vrije Universiteit Brussel", "Brussels", "Belgium"],
+  ["Université Libre de Bruxelles", "Brussels", "Belgium"],
+  ["Delft University of Technology", "Delft", "Netherlands"], ["TU Delft", "Delft", "Netherlands"],
+  ["University of Amsterdam", "Amsterdam", "Netherlands"], ["Vrije Universiteit Amsterdam", "Amsterdam", "Netherlands"],
+  ["Karolinska Institutet", "Stockholm", "Sweden"], ["KTH Royal Institute of Technology", "Stockholm", "Sweden"],
+  ["Chalmers University of Technology", "Gothenburg", "Sweden"],
+  ["Technical University of Denmark", "Copenhagen", "Denmark"],
+  ["University of Copenhagen", "Copenhagen", "Denmark"], ["University of Oslo", "Oslo", "Norway"],
+  ["Norwegian University of Science and Technology", "Trondheim", "Norway"],
+  ["University of Helsinki", "Helsinki", "Finland"], ["Aalto University", "Espoo", "Finland"],
+  ["University of Vienna", "Vienna", "Austria"], ["TU Wien", "Vienna", "Austria"],
+  ["Charles University", "Prague", "Czech Republic"], ["Jagiellonian University", "Krakow", "Poland"],
+  ["University of Warsaw", "Warsaw", "Poland"], ["Complutense", "Madrid", "Spain"],
+  ["Universidad Autónoma de Madrid", "Madrid", "Spain"], ["Universitat de Barcelona", "Barcelona", "Spain"],
+  ["Universitat Pompeu Fabra", "Barcelona", "Spain"], ["Universidade de Lisboa", "Lisbon", "Portugal"],
+  ["Universidade do Porto", "Porto", "Portugal"], ["Trinity College Dublin", "Dublin", "Ireland"],
+  ["University College Dublin", "Dublin", "Ireland"], ["CERN", "Geneva", "Switzerland"],
+  ["EMBL Heidelberg", "Heidelberg", "Germany"], ["Max Planck Institute", "Munich", "Germany"],
+  // Reti/associazioni senza una sede unica: si riconduce solo al paese (città
+  // null), meglio che indicare una città specifica sbagliata.
+  ["Helmholtz Association", null, "Germany"], ["Helmholtz", null, "Germany"],
+];
+
+const INSTITUTION_ENTRIES = INSTITUTIONS.slice()
+  .sort((a, b) => b[0].length - a[0].length)
+  .map(([name, city, country]) => ({
+    name,
+    city,
+    country,
+    escaped: name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+  }));
+
+// Stessa logica di extractCities (case-sensitive di default, insensitive su
+// testo "urlato"), ma cerca nomi di istituzioni invece di città: utile come
+// secondo tentativo quando nessuna città dell'elenco principale è presente
+// nel testo (es. annunci che citano solo l'ateneo). Alcune istituzioni (reti
+// o associazioni senza una sede unica, es. "Helmholtz Association") hanno
+// `city: null`: qui vengono comunque restituite, con `city: null`, così chi
+// chiama può comunque risalire almeno al paese.
+function extractInstitutions(text) {
+  if (!text) return [];
+  const flags = isShoutyText(text) ? "i" : "";
+  const found = [];
+  const seenKey = new Set();
+  for (const { name, city, country, escaped } of INSTITUTION_ENTRIES) {
+    const key = city ? city.toLowerCase() : `country:${country.toLowerCase()}`;
+    if (seenKey.has(key)) continue;
+    const m = text.match(new RegExp(`\\b${escaped}\\b`, flags));
+    if (!m) continue;
+    seenKey.add(key);
+    found.push({ city: city ? canonicalCityName(city) : null, country, index: m.index });
+  }
+  found.sort((a, b) => a.index - b.index);
+  return found.slice(0, 6);
+}
+
 function deriveLocation(item) {
   const hay = `${item.title} ${item.description} ${item.source}`;
 
-  const cityMatches = extractCities(hay);
+  let cityMatches = extractCities(hay);
+  // Aggiunge anche le città dedotte dai nomi di istituzioni note (es.
+  // "Sorbonne" → Parigi), utile soprattutto per i dottorati condivisi tra
+  // più sedi dove magari solo una sede è nominata come città esplicita e le
+  // altre solo come nome di ateneo. Non duplica una città già trovata. Le
+  // istituzioni senza una sede unica (`city: null`, es. "Helmholtz
+  // Association") non entrano in questo elenco di città (non c'è un punto
+  // preciso da aggiungere): si tengono da parte come riserva per il solo
+  // paese, usata più sotto solo se non emerge nessuna città da nessun'altra
+  // fonte.
+  const instMatches = extractInstitutions(hay);
+  const countryOnlyInst = instMatches.find((m) => !m.city);
+  const instCityMatches = instMatches.filter((m) => m.city);
+  if (instCityMatches.length > 0) {
+    const existingCities = new Set(cityMatches.map((m) => m.city.toLowerCase()));
+    for (const im of instCityMatches) {
+      const key = im.city.toLowerCase();
+      if (existingCities.has(key)) continue;
+      existingCities.add(key);
+      cityMatches = [...cityMatches, im];
+    }
+    cityMatches.sort((a, b) => a.index - b.index);
+  }
   if (cityMatches.length > 0) {
     const uniqueCountries = Array.from(new Set(cityMatches.map((m) => m.country)));
     const country = item.countryHint || uniqueCountries[0];
@@ -457,8 +562,11 @@ function deriveLocation(item) {
     return { country: item.countryHint, city: extractCity(hay, item.countryHint) };
   }
   const found = extractCountry(hay);
-  if (!found) return { country: null, city: null };
-  return { country: found.label, city: extractCity(hay, found.raw) };
+  if (found) return { country: found.label, city: extractCity(hay, found.raw) };
+  // Ultima riserva: un'istituzione/rete senza sede unica (es. "Helmholtz
+  // Association") che almeno indica il paese.
+  if (countryOnlyInst) return { country: countryOnlyInst.country, city: null };
+  return { country: null, city: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -686,10 +794,72 @@ const MAIL_PROFILES = [
   },
 ];
 
+function looksLikeUrl(s) {
+  return /^https?:\/\//i.test(String(s || "").trim());
+}
+
+// Formato osservato nelle vere email "New results for your saved search" di
+// EURAXESS (verificato su un esempio reale fornito dall'utente): un elenco
+// puntato dove ogni voce è "- Titolo" (spesso il titolo va a capo su più
+// righe, perché il testo dell'email è formattato a larghezza fissa) seguito
+// dalla URL dell'annuncio da sola sulla riga successiva. Un separatore "---"
+// chiude l'elenco, dopodiché ci sono solo link di gestione/disiscrizione da
+// ignorare. Questo parser associa titolo e URL senza ambiguità quando il
+// formato corrisponde; se non riconosce nulla ritorna un elenco vuoto e si
+// ripiega sulle altre strategie qui sotto.
+function extractBulletTextItems(text) {
+  const items = [];
+  const lines = String(text).split(/\r?\n/);
+  let pendingTitle = null;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (/^-{3,}$/.test(line)) {
+      pendingTitle = null; // separatore di fine elenco
+      continue;
+    }
+    if (/^-\s+/.test(line)) {
+      pendingTitle = line.replace(/^-\s+/, "").trim();
+      continue;
+    }
+    const urlMatch = line.match(/^(https?:\/\/\S+)/);
+    if (urlMatch) {
+      const href = urlMatch[1].replace(/[.,;)\]]+$/, "");
+      if (pendingTitle) {
+        const profile = MAIL_PROFILES.find((p) => p.hrefTest(href));
+        if (profile) {
+          items.push({ title: pendingTitle, link: href, description: pendingTitle, source: profile.label });
+        }
+      }
+      pendingTitle = null;
+      continue;
+    }
+    if (pendingTitle !== null && line) {
+      // continuazione del titolo su più righe
+      pendingTitle = `${pendingTitle} ${line}`.trim();
+    }
+  }
+  return items;
+}
+
 function extractMailItems(html, text) {
   const items = [];
   const seenLinks = new Set();
 
+  // 1) Elenco puntato in testo semplice (formato EURAXESS attuale) — il più
+  // affidabile quando riconosciuto, si prova per primo.
+  if (text) {
+    for (const it of extractBulletTextItems(text)) {
+      if (seenLinks.has(it.link)) continue;
+      seenLinks.add(it.link);
+      items.push(it);
+    }
+  }
+
+  // 2) HTML: cerca link il cui href corrisponde a un profilo noto. Alcuni
+  // template (incluso quello EURAXESS attuale) mostrano l'URL stessa come
+  // testo del link invece del titolo vero, che si trova invece nel testo
+  // subito prima, separato da un <br> nello stesso blocco: in quel caso si
+  // prova a recuperarlo da lì invece di mostrare l'URL come titolo.
   if (html) {
     const $ = cheerio.load(html);
     $("a[href]").each((_, el) => {
@@ -700,20 +870,41 @@ function extractMailItems(html, text) {
       if (!profile) return;
 
       let title = $el.text().replace(/\s+/g, " ").trim();
-      if (!title || title.length < 6) {
-        // Alcuni template usano immagini o link vuoti come testo: prova il
-        // blocco genitore più vicino.
+      if (!title || title.length < 6 || looksLikeUrl(title)) {
+        title = "";
         const $container = $el.closest("tr, td, div, li, p");
-        title = $container.length ? $container.text().replace(/\s+/g, " ").trim().slice(0, 140) : "";
+        if ($container.length) {
+          const innerHtml = $container.html() || "";
+          const segments = innerHtml.split(/<br\s*\/?>/i);
+          const idx = segments.findIndex((seg) => seg.includes(href));
+          if (idx > 0) {
+            const prevText = cheerio
+              .load(`<div>${segments[idx - 1]}</div>`)("div")
+              .text()
+              .replace(/\s+/g, " ")
+              .trim()
+              .replace(/^-+\s*/, "");
+            if (prevText && !looksLikeUrl(prevText)) title = prevText.slice(0, 200);
+          }
+          if (!title) {
+            const containerText = $container.text().replace(/\s+/g, " ").trim();
+            if (containerText && containerText.length < 300 && !looksLikeUrl(containerText)) {
+              title = containerText;
+            }
+          }
+        }
       }
       if (!title) title = href;
 
       seenLinks.add(href);
       items.push({ title, link: href, description: title, source: profile.label });
     });
-  } else if (text) {
-    // Fallback per email in solo testo: cerca URL nudi che corrispondono ai
-    // pattern noti, usando la riga stessa come titolo (meglio di niente).
+  }
+
+  // 3) Fallback riga-per-riga generico (URL nudo su una riga di testo, con
+  // eventuale titolo sulla stessa riga) — usato solo se le strategie sopra
+  // non hanno trovato nulla, per email in formati diversi da quelli noti.
+  if (items.length === 0 && text) {
     const lines = text.split(/\r?\n/);
     for (const line of lines) {
       const urlMatch = line.match(/https?:\/\/\S+/);
