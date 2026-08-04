@@ -30,6 +30,13 @@
       <span id="totalCount">0 offerte</span>
     </div>
 
+    <div class="top-actions">
+      <button type="button" id="openMapBtn" class="open-map-btn">
+        <svg class="icon" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M1.5 3.2 5.7 1.8l4.6 1.6 4.2-1.4v11l-4.2 1.4-4.6-1.6-4.2 1.4Z"/><path d="M5.7 1.8v11M10.3 3.4v11"/></svg>
+        <span>Mappa dei preferiti</span>
+      </button>
+    </div>
+
     <div class="controls">
       <input id="searchBox" class="search-input" type="search" placeholder="Cerca per parola chiave, città, ateneo…" autocomplete="off" />
 
@@ -67,18 +74,6 @@
     Nessuna offerta trovata con questi filtri.<br />Prova ad allargare la ricerca.
   </div>
 
-  <section class="manual" id="interestMapSection">
-    <div class="map-header">
-      <h3>Dottorati che ti interessano — mappa</h3>
-      <button type="button" id="mapThemeToggle" class="map-theme-toggle">Tema chiaro</button>
-    </div>
-    <div id="interestMap" class="interest-map"></div>
-    <p id="interestMapEmpty" class="prefs-note" style="display:none;">
-      Segna come "Interessa" almeno un annuncio con un luogo riconosciuto
-      per vederlo qui sulla mappa.
-    </p>
-  </section>
-
   <section class="manual" id="manualSection">
     <h3>Fonti da controllare manualmente</h3>
     <div id="manualLinks"></div>
@@ -103,6 +98,22 @@
     PhD Tracker · aggiornato automaticamente ogni 6 ore via GitHub Actions ·
     <a href="README.md">come funziona / come personalizzarlo</a>
   </footer>
+
+  <div id="mapView" class="map-view" aria-hidden="true">
+    <div class="map-view-header">
+      <button type="button" id="closeMapBtn" class="map-close-btn">
+        <svg class="icon" viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 3 5.5 8l5 5"/></svg>
+        <span>Elenco</span>
+      </button>
+      <h3>Dottorati che ti interessano</h3>
+      <button type="button" id="mapThemeToggle" class="map-theme-toggle">Tema chiaro</button>
+    </div>
+    <div id="interestMap" class="interest-map"></div>
+    <p id="interestMapEmpty" class="prefs-note map-empty-note" style="display:none;">
+      Segna come "Interessa" almeno un annuncio con un luogo riconosciuto
+      per vederlo qui sulla mappa.
+    </p>
+  </div>
 
 </div>
 

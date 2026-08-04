@@ -191,6 +191,21 @@ let interestMap = null;
 let interestMapLayer = null;
 let interestMapMarkers = [];
 
+// Segnaposto minimale (un pin con un piccolo foro), invece del pallino blu
+// di default di Leaflet — stesso linguaggio grafico dell'icona di luogo già
+// usata sulle card, colorato con l'accento del tema.
+function mapPinIcon() {
+  const svg =
+    '<svg viewBox="0 0 26 34" width="26" height="34"><path d="M13 0C5.8 0 0 5.8 0 13c0 9.7 13 21 13 21s13-11.3 13-21C26 5.8 20.2 0 13 0Z" fill="var(--accent)" stroke="var(--bg)" stroke-width="1.5"/><circle cx="13" cy="13" r="5" fill="var(--bg)"/></svg>';
+  return L.divIcon({
+    className: "map-pin-icon",
+    html: svg,
+    iconSize: [26, 34],
+    iconAnchor: [13, 32],
+    tooltipAnchor: [0, -28],
+  });
+}
+
 function ensureInterestMap() {
   if (interestMap || typeof L === "undefined") return interestMap;
   const el = $("#interestMap");
@@ -210,11 +225,74 @@ function applyMapTheme(theme) {
   interestMapLayer = L.tileLayer(MAP_TILES[theme], { attribution: MAP_ATTRIBUTION, maxZoom: 19 }).addTo(interestMap);
 }
 
+// Chiude la mappa e riporta alla card dell'annuncio nell'elenco (non al sito
+// esterno): se la card non è visibile per via di un filtro attivo, i filtri
+// vengono azzerati per garantire che l'annuncio torni visibile.
+function jumpToListing(id) {
+  closeMapView();
+  let card = document.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
+  if (!card) {
+    state.activeChip = "Tutte";
+    state.activeCountry = "Tutti i paesi";
+    state.activeStatus = "Tutte";
+    state.search = "";
+    state.onlyNew = false;
+    localStorage.setItem("phdtracker.chip", state.activeChip);
+    localStorage.setItem("phdtracker.country", state.activeCountry);
+    localStorage.setItem("phdtracker.status", state.activeStatus);
+    localStorage.setItem("phdtracker.search", state.search);
+    localStorage.setItem("phdtracker.onlyNew", "0");
+    const searchBox = $("#searchBox");
+    if (searchBox) searchBox.value = "";
+    const onlyNewToggle = $("#onlyNewToggle");
+    if (onlyNewToggle) onlyNewToggle.checked = false;
+    renderChips();
+    renderCountryChips();
+    renderStatusChips();
+    renderFiltersBadge();
+    renderList();
+    card = document.querySelector(`.card[data-id="${CSS.escape(id)}"]`);
+  }
+  if (!card) return;
+  setTimeout(() => {
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("card-highlight");
+    setTimeout(() => card.classList.remove("card-highlight"), 1800);
+  }, 350); // aspetta che l'animazione di chiusura della mappa finisca
+}
+
+function openMapView() {
+  const view = $("#mapView");
+  if (!view) return;
+  view.classList.add("open");
+  view.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  renderInterestMap();
+  setTimeout(() => {
+    if (interestMap) interestMap.invalidateSize();
+  }, 340);
+}
+
+function closeMapView() {
+  const view = $("#mapView");
+  if (!view) return;
+  view.classList.remove("open");
+  view.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
 function renderInterestMap() {
-  const section = $("#interestMapSection");
   const mapEl = $("#interestMap");
   const emptyEl = $("#interestMapEmpty");
-  if (!section || !mapEl || !emptyEl) return;
+  if (!mapEl || !emptyEl) return;
+
+  // La mappa (Leaflet + tile da Internet) si inizializza solo quando viene
+  // effettivamente aperta almeno una volta, non a ogni cambio di interesse o
+  // al caricamento della pagina: evita di caricare mappe di sfondo che
+  // l'utente potrebbe non guardare mai.
+  const view = $("#mapView");
+  const openedAtLeastOnce = interestMap !== null || (view && view.classList.contains("open"));
+  if (!openedAtLeastOnce) return;
 
   const withCoords = state.listings
     .filter((it) => getInterest(it.id) === "yes")
@@ -225,7 +303,7 @@ function renderInterestMap() {
     // Leaflet non è (ancora) caricato, es. offline al primo avvio: nessun
     // errore bloccante, si mostra solo il messaggio informativo.
     mapEl.style.display = "none";
-    emptyEl.style.display = "block";
+    emptyEl.style.display = "flex";
     emptyEl.textContent =
       "La mappa richiede una connessione a Internet per caricarsi (usa OpenStreetMap/CARTO).";
     return;
@@ -233,7 +311,7 @@ function renderInterestMap() {
 
   if (withCoords.length === 0) {
     mapEl.style.display = "none";
-    emptyEl.style.display = "block";
+    emptyEl.style.display = "flex";
     emptyEl.textContent =
       'Segna come "Interessa" almeno un annuncio con un luogo riconosciuto per vederlo qui sulla mappa.';
     return;
@@ -250,18 +328,15 @@ function renderInterestMap() {
 
   const bounds = [];
   for (const { item, coords } of withCoords) {
-    const marker = L.circleMarker(coords, {
-      radius: 7,
-      color: "#4f8ef7",
-      weight: 2,
-      fillColor: "#4f8ef7",
-      fillOpacity: 0.85,
-    }).addTo(map);
+    const marker = L.marker(coords, { icon: mapPinIcon(), keyboard: false }).addTo(map);
     const loc = locationText(item) || "";
-    marker.bindPopup(
-      `<strong>${escapeHtml(item.title)}</strong><br>${escapeHtml(loc)}<br><a href="${item.link}" target="_blank" rel="noopener">Apri annuncio →</a>`
-    );
-    marker.on("click", () => marker.openPopup());
+    marker.bindTooltip(`${escapeHtml(item.title.slice(0, 60))}${loc ? ` — ${escapeHtml(loc)}` : ""}`, {
+      direction: "top",
+      opacity: 1,
+    });
+    // Il click riconduce alla scheda dell'annuncio dentro l'app, non al link
+    // esterno: coerente con l'uso della mappa come indice geografico interno.
+    marker.on("click", () => jumpToListing(item.id));
     interestMapMarkers.push(marker);
     bounds.push(coords);
   }
@@ -272,7 +347,7 @@ function renderInterestMap() {
     map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
   }
 
-  // Leaflet calcola le dimensioni al momento dell'init: se la sezione era
+  // Leaflet calcola le dimensioni al momento dell'init: se la mappa era
   // nascosta/appena resa visibile le misure possono essere sbagliate finché
   // non si forza un ricalcolo.
   setTimeout(() => map.invalidateSize(), 50);
@@ -783,6 +858,16 @@ function bindControls() {
       applyMapTheme(state.mapTheme === "dark" ? "light" : "dark");
     });
   }
+
+  const openMapBtn = $("#openMapBtn");
+  if (openMapBtn) openMapBtn.addEventListener("click", openMapView);
+
+  const closeMapBtn = $("#closeMapBtn");
+  if (closeMapBtn) closeMapBtn.addEventListener("click", closeMapView);
+
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeMapView();
+  });
 }
 
 async function init() {

@@ -396,30 +396,38 @@ elenco è ampliabile allo stesso modo: aggiungi una riga `["NomeIstituzione",
 
 ## 9. Mappa dei dottorati che ti interessano
 
-In fondo alla pagina, sopra "Fonti da controllare manualmente", trovi una
-**mappa del mondo minimale** (in stile chiaro o scuro, con un pulsante per
-alternare) con un segnaposto per ogni annuncio segnato come **"Ti
-interessa"** (vedi punto 6) e per cui è stato riconosciuto un luogo — città
-o, quando non c'è una città precisa, almeno il paese (es. gli annunci di
-reti/associazioni senza una sede unica, come la **Helmholtz Association**,
-mostrano un segnaposto al centro della Germania).
+In cima alla pagina, sotto il conteggio degli annunci, c'è il pulsante
+**"Mappa dei preferiti"**: lo apri e la mappa scorre a schermo intero sopra
+il resto della pagina (senza ricaricarla — è solo un cambio di vista, con
+un'animazione di scorrimento), con un segnaposto per ogni annuncio segnato
+come **"Ti interessa"** (vedi punto 6) e per cui è stato riconosciuto un
+luogo — città o, quando non c'è una città precisa, almeno il paese (es. gli
+annunci di reti/associazioni senza una sede unica, come la **Helmholtz
+Association**, mostrano un segnaposto al centro della Germania). Un
+pulsante in alto alterna tra mappa scura e chiara, entrambe in stile
+minimale; "← Elenco" (o il tasto Esc) chiude la mappa e torna alla pagina.
 
-Toccando un segnaposto si apre un fumetto con titolo, luogo e un link che
-apre l'annuncio originale in una nuova scheda — la mappa non serve solo per
-farsi un'idea geografica dei dottorati, ma anche come scorciatoia per
-tornarci sopra rapidamente. Se non hai ancora segnato nessun annuncio come
+**Toccare un segnaposto ti riporta alla scheda dell'annuncio nell'elenco di
+PhD Tracker** (non al sito esterno): la mappa si chiude, la pagina scorre
+fino alla card giusta e la evidenzia per un attimo — se un filtro attivo la
+teneva nascosta, i filtri vengono azzerati automaticamente così la trovi
+comunque. Da lì, come sempre, è il link "Apri annuncio →" sulla card a
+portare al sito originale. Se non hai ancora segnato nessun annuncio come
 "Ti interessa" (o nessuno di quelli segnati ha un luogo riconosciuto),
-compare un messaggio invece della mappa vuota.
+aprendo la mappa compare un messaggio invece della mappa vuota.
 
 **Come funziona tecnicamente**: la mappa usa [Leaflet](https://leafletjs.com)
 (libreria open source, caricata da CDN) con le mappe di sfondo minimali di
 [CARTO](https://carto.com) (varianti chiaro/scuro, gratuite e senza chiave
-API per un uso personale come questo). Le coordinate di ogni luogo sono
-approssimative — città/paese, non l'indirizzo esatto dell'ateneo — pensate
-solo per posizionare un segnaposto su una mappa, non per navigazione di
-precisione. **Richiede una connessione a Internet** per caricare la
-libreria e le mappe di sfondo (come già il resto dei dati dell'app): offline
-compare il messaggio informativo al posto della mappa, senza errori.
+API per un uso personale come questo), e un segnaposto disegnato su misura
+(non il pallino blu di default di Leaflet) coerente con lo stile dell'app.
+Le coordinate di ogni luogo sono approssimative — città/paese, non
+l'indirizzo esatto dell'ateneo — pensate solo per posizionare un segnaposto
+su una mappa, non per navigazione di precisione. La mappa si carica solo
+quando la apri la prima volta (non appesantisce il caricamento iniziale
+della pagina) e **richiede una connessione a Internet** per farlo (come già
+il resto dei dati dell'app): offline compare il messaggio informativo al
+posto della mappa, senza errori.
 
 ---
 
