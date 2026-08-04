@@ -618,6 +618,35 @@ function matchesCountry(item, config) {
 // ---------------------------------------------------------------------------
 // Notifiche via ntfy.sh
 // ---------------------------------------------------------------------------
+// Gli header HTTP (usati qui per Title/Click/Priority) accettano solo
+// caratteri "ByteString" (0-255): un'emoji o un trattino lungo "—" nel
+// titolo di un annuncio li fa superare quel limite e fetch() lancia un
+// errore ("Cannot convert argument to a ByteString..."), facendo fallire
+// l'intera notifica in silenzio. ntfy consiglia di codificare gli header
+// non-ASCII secondo RFC 2047 (vedi https://docs.ntfy.sh/publish/): se il
+// titolo contiene caratteri non ASCII lo si codifica in base64, altrimenti
+// lo si lascia invariato.
+function encodeHeaderValue(value) {
+  const s = String(value ?? "");
+  if (/^[\x00-\x7F]*$/.test(s)) return s; // solo ASCII: nessuna codifica necessaria
+  return `=?UTF-8?B?${Buffer.from(s, "utf8").toString("base64")}?=`;
+}
+
+// Il link (header Click) deve restare un URL valido e cliccabile, quindi non
+// si può codificare come RFC 2047: nel raro caso contenga caratteri non
+// ASCII (es. un URL con caratteri accentati non percent-encoded dalla
+// fonte), lo si percent-encoda con encodeURI invece di lasciar fallire
+// l'intera notifica.
+function safeUrlHeader(url) {
+  const s = String(url || "");
+  if (/^[\x00-\x7F]*$/.test(s)) return s;
+  try {
+    return encodeURI(s);
+  } catch {
+    return s.replace(/[^\x00-\x7F]/g, "");
+  }
+}
+
 async function sendNtfy(topic, { title, message, click, priority }) {
   if (!topic) {
     console.warn("⚠️  NTFY_TOPIC non impostato: salto l'invio della notifica.");
@@ -627,8 +656,8 @@ async function sendNtfy(topic, { title, message, click, priority }) {
     await fetchWithTimeout(`https://ntfy.sh/${encodeURIComponent(topic)}`, {
       method: "POST",
       headers: {
-        Title: title,
-        ...(click ? { Click: click } : {}),
+        Title: encodeHeaderValue(title),
+        ...(click ? { Click: safeUrlHeader(click) } : {}),
         ...(priority ? { Priority: priority } : {}),
         "Content-Type": "text/plain; charset=utf-8",
       },
