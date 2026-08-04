@@ -1210,21 +1210,29 @@ async function main() {
 
   console.log(`Trovati ${allRaw.length} annunci grezzi dalle fonti configurate.`);
 
-  const matched = [];
-  for (const item of allRaw) {
-    if (isExcluded(item, config)) continue;
-    if (!matchesPhdIndicator(item, config)) continue;
-
+  // jobrxiv.org spesso mostra il nome del datore di lavoro/ente (unico
+  // indizio di luogo per molti annunci, es. reti/associazioni come la
+  // "Helmholtz Association") solo nella pagina del singolo annuncio, non
+  // nell'estratto della pagina di ricerca già raccolto: se non è emerso
+  // nessun luogo dal testo già disponibile, si prova a scaricare anche
+  // quella pagina e si ritenta l'estrazione con quel testo in più. Il
+  // risultato (trovato o no) si segna con `locTried: true` così non si
+  // ritenta all'infinito ad ogni esecuzione lo stesso annuncio senza
+  // successo — e un contatore per run limita quante richieste in più si
+  // fanno in una singola esecuzione, per restare garbati col sito.
+  let jobrxivEnrichBudget = 20;
+  async function resolveLocation(item) {
     let { country, city } = deriveLocation(item);
-
-    // jobrxiv.org spesso mostra il nome del datore di lavoro/ente (unico
-    // indizio di luogo per molti annunci, es. reti/associazioni come la
-    // "Helmholtz Association") solo nella pagina del singolo annuncio, non
-    // nell'estratto della pagina di ricerca già raccolto: se non è emerso
-    // nessun luogo dal testo già disponibile, si prova a scaricare anche
-    // quella pagina (solo per questo caso, per non moltiplicare le
-    // richieste) e si ritenta l'estrazione con quel testo in più.
-    if (!country && item.link && /^jobrxiv\.org/.test(item.source || "")) {
+    let locTried = item.locTried || false;
+    if (
+      !country &&
+      !locTried &&
+      jobrxivEnrichBudget > 0 &&
+      item.link &&
+      /^jobrxiv\.org/.test(item.source || "")
+    ) {
+      jobrxivEnrichBudget--;
+      locTried = true;
       const extra = await fetchJobrxivDetailText(item.link);
       if (extra) {
         const retry = deriveLocation({ ...item, description: `${item.description} ${extra}` });
@@ -1232,9 +1240,17 @@ async function main() {
         city = retry.city;
       }
     }
+    return { country, city, locTried };
+  }
 
+  const matched = [];
+  for (const item of allRaw) {
+    if (isExcluded(item, config)) continue;
+    if (!matchesPhdIndicator(item, config)) continue;
+
+    const { country, city, locTried } = await resolveLocation(item);
     const payText = extractPay(`${item.title} ${item.description}`);
-    const withLocation = { ...item, country, city, payText };
+    const withLocation = { ...item, country, city, payText, locTried };
 
     if (!matchesCountry(withLocation, config)) continue;
     const kws = matchedKeywords(withLocation, config);
@@ -1250,16 +1266,19 @@ async function main() {
 
   // Ricalcola paese/città/paga anche per gli annunci GIÀ salvati (non solo
   // per quelli nuovi): senza questo passaggio, un miglioramento
-  // all'estrazione (come la correzione del bug sui testi TUTTO MAIUSCOLO)
-  // si applicherebbe solo alle offerte trovate da ora in poi, lasciando per
-  // sempre "vuoti" gli annunci già presenti in data/listings.json da prima.
-  // È un ricalcolo economico (solo regex sul testo già salvato, nessuna
-  // richiesta di rete), quindi lo si fa ad ogni esecuzione.
-  const backfilledListings = listings.map((it) => {
-    const { country, city } = deriveLocation(it);
+  // all'estrazione (come la correzione del bug sui testi TUTTO MAIUSCOLO, o
+  // l'aggiunta di nuove istituzioni riconosciute) si applicherebbe solo alle
+  // offerte trovate da ora in poi, lasciando per sempre "vuoti" gli annunci
+  // già presenti in data/listings.json da prima. Include anche il tentativo
+  // di leggere la pagina singola per jobrxiv.org (vedi sopra) quando non
+  // ancora provato: è l'unico modo per cui un annuncio già salvato PRIMA che
+  // questa funzionalità esistesse può ancora ottenere un luogo.
+  const backfilledListings = [];
+  for (const it of listings) {
+    const { country, city, locTried } = await resolveLocation(it);
     const payText = extractPay(`${it.title} ${it.description}`);
-    return { ...it, country, city, payText };
-  });
+    backfilledListings.push({ ...it, country, city, payText, locTried });
+  }
 
   // Aggiorna listings.json: metti i nuovi in testa, tieni gli esistenti, cappa la lunghezza
   const now = new Date().toISOString();

@@ -401,8 +401,12 @@ differenza degli altri, il nome dell'ente/datore di lavoro spesso compare
 di ricerca che lo script legge normalmente — per quanto si allarghi il
 testo raccolto lì, quell'informazione non c'è. Per questo, quando un
 annuncio jobrxiv.org non produce nessun luogo dal testo già raccolto, lo
-script scarica anche la sua pagina singola e riprova — solo in quel caso
-specifico, per non moltiplicare inutilmente le richieste verso il sito.
+script scarica anche la sua pagina singola e riprova — sia per gli annunci
+nuovi sia, retroattivamente, per quelli già salvati in precedenza (fino a
+un tetto di richieste extra per esecuzione, per non sovraccaricare il
+sito: se un annuncio non viene coperto in un'esecuzione, ci riprova in
+quella successiva). Una volta tentato — con o senza successo — l'annuncio
+non viene più ritentato in eterno ad ogni esecuzione.
 
 ---
 
@@ -428,6 +432,14 @@ portare al sito originale. Se non hai ancora segnato nessun annuncio come
 "Ti interessa" (o nessuno di quelli segnati ha un luogo riconosciuto),
 aprendo la mappa compare un messaggio invece della mappa vuota.
 
+**Vale anche il percorso inverso**: sulla card di un annuncio segnato "Ti
+interessa", l'etichetta di luogo (quella con l'icona a goccia) è cliccabile
+e apre direttamente la mappa centrata su quel segnaposto, evidenziandolo per
+un attimo — comodo per vedere subito dove si trova senza dover cercarlo tra
+tutti gli altri. Sugli annunci non ancora segnati come interessanti resta
+un'etichetta normale, non cliccabile (non essendo sulla mappa non c'è dove
+portare).
+
 Quando più annunci ricadono sulla stessa città (o sullo stesso paese, per
 quelli senza una città precisa), i segnaposto vengono automaticamente
 disposti in un piccolo cerchio invece di sovrapporsi uno sopra l'altro —
@@ -439,14 +451,16 @@ lontano per notare la differenza.
 (libreria open source, caricata da CDN) con le mappe di sfondo minimali di
 [CARTO](https://carto.com) (varianti chiaro/scuro, gratuite e senza chiave
 API per un uso personale come questo), e un segnaposto disegnato su misura
-(non il pallino blu di default di Leaflet) coerente con lo stile dell'app.
-Le coordinate di ogni luogo sono approssimative — città/paese, non
-l'indirizzo esatto dell'ateneo — pensate solo per posizionare un segnaposto
-su una mappa, non per navigazione di precisione. La mappa si carica solo
-quando la apri la prima volta (non appesantisce il caricamento iniziale
-della pagina) e **richiede una connessione a Internet** per farlo (come già
-il resto dei dati dell'app): offline compare il messaggio informativo al
-posto della mappa, senza errori.
+(un piccolo pallino bianco con un anello attorno, non il pallino blu di
+default di Leaflet) pensato per restare compatto e non ingombrare anche
+quando diversi segnaposto sono vicini tra loro. Le coordinate di ogni luogo
+sono approssimative — città/paese, non l'indirizzo esatto dell'ateneo —
+pensate solo per posizionare un segnaposto su una mappa, non per
+navigazione di precisione. La mappa si carica solo quando la apri la prima
+volta (non appesantisce il caricamento iniziale della pagina) e **richiede
+una connessione a Internet** per farlo (come già il resto dei dati
+dell'app): offline compare il messaggio informativo al posto della mappa,
+senza errori.
 
 ---
 

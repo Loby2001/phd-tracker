@@ -303,6 +303,22 @@ main { margin-top: 18px; }
   color: var(--text);
 }
 
+button.meta-pill-locate {
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+button.meta-pill-locate:hover,
+button.meta-pill-locate:focus-visible {
+  border-color: var(--accent);
+  background: var(--chip-bg-active);
+}
+
+button.meta-pill-locate:active {
+  transform: scale(0.97);
+}
+
 .meta-pill .icon,
 .interest-btn .icon {
   flex: none;
@@ -508,8 +524,9 @@ section.manual h3 {
   margin: 0;
 }
 
-/* Segnaposto: un pin minimale invece del pallino blu di default di Leaflet,
-   coerente con l'icona di luogo già usata sulle card. */
+/* Segnaposto: un piccolo pallino bianco pieno con un anello bianco più
+   sottile intorno — compatto e poco ingombrante, ma visibile sia sulla mappa
+   chiara che su quella scura. */
 .map-pin-icon {
   transition: transform 0.15s ease;
   cursor: pointer;
@@ -517,11 +534,24 @@ section.manual h3 {
 
 .map-pin-icon:hover,
 .map-pin-icon:focus-visible {
-  transform: scale(1.15);
+  transform: scale(1.25);
 }
 
 .map-pin-icon svg {
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+}
+
+/* Evidenzia brevemente un segnaposto quando ci si arriva dall'etichetta di
+   luogo di una card (percorso inverso di card-highlight). */
+.map-pin-icon-pulse svg circle:first-child {
+  animation: mapPinPulse 1.6s ease;
+}
+
+@keyframes mapPinPulse {
+  0% { r: 8.5; opacity: 0.9; }
+  35% { r: 13; opacity: 0.35; }
+  70% { r: 8.5; opacity: 0.9; }
+  100% { r: 8.5; opacity: 0.9; }
 }
 
 .interest-map .leaflet-tooltip {

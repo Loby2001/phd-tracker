@@ -190,19 +190,21 @@ function locationCoords(item) {
 let interestMap = null;
 let interestMapLayer = null;
 let interestMapMarkers = [];
+let interestMapMarkersById = new Map();
 
-// Segnaposto minimale (un pin con un piccolo foro), invece del pallino blu
-// di default di Leaflet — stesso linguaggio grafico dell'icona di luogo già
-// usata sulle card, colorato con l'accento del tema.
+// Segnaposto minimale — un pallino bianco pieno circondato da un anello
+// bianco più sottile, piccolo e poco ingombrante ma visibile su qualsiasi
+// sfondo (mappa chiara o scura). Niente forma a goccia: resta compatto
+// anche quando più segnaposto sono vicini tra loro.
 function mapPinIcon() {
   const svg =
-    '<svg viewBox="0 0 26 34" width="26" height="34"><path d="M13 0C5.8 0 0 5.8 0 13c0 9.7 13 21 13 21s13-11.3 13-21C26 5.8 20.2 0 13 0Z" fill="var(--accent)" stroke="var(--bg)" stroke-width="1.5"/><circle cx="13" cy="13" r="5" fill="var(--bg)"/></svg>';
+    '<svg viewBox="0 0 20 20" width="16" height="16"><circle cx="10" cy="10" r="8.5" fill="none" stroke="#ffffff" stroke-width="1.6" opacity="0.9"/><circle cx="10" cy="10" r="4" fill="#ffffff"/></svg>';
   return L.divIcon({
     className: "map-pin-icon",
     html: svg,
-    iconSize: [26, 34],
-    iconAnchor: [13, 32],
-    tooltipAnchor: [0, -28],
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+    tooltipAnchor: [0, -10],
   });
 }
 
@@ -281,6 +283,33 @@ function closeMapView() {
   document.body.style.overflow = "";
 }
 
+// Apre la mappa (se non già aperta) e centra la vista sul segnaposto
+// dell'annuncio indicato, evidenziandolo per un attimo — usata dall'etichetta
+// di luogo sulla card, il percorso inverso di jumpToListing().
+function jumpToMapMarker(id) {
+  openMapView();
+  const tryLocate = (attemptsLeft) => {
+    const marker = interestMapMarkersById.get(id);
+    if (!marker) {
+      // La mappa potrebbe non aver ancora finito di renderizzare i
+      // segnaposto al primo tentativo: si riprova per un breve periodo
+      // prima di arrendersi silenziosamente.
+      if (attemptsLeft > 0) setTimeout(() => tryLocate(attemptsLeft - 1), 120);
+      return;
+    }
+    const latlng = marker.getLatLng();
+    const targetZoom = interestMap ? Math.max(interestMap.getZoom(), 11) : 11;
+    interestMap.setView(latlng, targetZoom, { animate: true });
+    marker.openTooltip();
+    const el = marker.getElement();
+    if (el) {
+      el.classList.add("map-pin-icon-pulse");
+      setTimeout(() => el.classList.remove("map-pin-icon-pulse"), 1600);
+    }
+  };
+  setTimeout(() => tryLocate(8), 380); // aspetta l'animazione di apertura + il render dei segnaposto
+}
+
 // Quando più annunci ricadono sulla stessa città (stesse coordinate esatte),
 // li dispone in un piccolo cerchio attorno al punto originale invece di
 // impilarli uno sopra l'altro — altrimenti risultano indistinguibili e solo
@@ -354,6 +383,7 @@ function renderInterestMap() {
 
   for (const m of interestMapMarkers) map.removeLayer(m);
   interestMapMarkers = [];
+  interestMapMarkersById = new Map();
 
   const bounds = [];
   for (const { item, coords } of withCoords) {
@@ -367,6 +397,7 @@ function renderInterestMap() {
     // esterno: coerente con l'uso della mappa come indice geografico interno.
     marker.on("click", () => jumpToListing(item.id));
     interestMapMarkers.push(marker);
+    interestMapMarkersById.set(item.id, marker);
     bounds.push(coords);
   }
 
@@ -633,7 +664,13 @@ function renderList() {
       ${
         loc || item.payText
           ? `<div class="meta-row">
-              ${loc ? `<span class="meta-pill">${ICON_PIN}${escapeHtml(loc)}</span>` : ""}
+              ${
+                loc
+                  ? interest === "yes"
+                    ? `<button type="button" class="meta-pill meta-pill-locate" title="Mostra sulla mappa">${ICON_PIN}${escapeHtml(loc)}</button>`
+                    : `<span class="meta-pill">${ICON_PIN}${escapeHtml(loc)}</span>`
+                  : ""
+              }
               ${item.payText ? `<span class="meta-pill">${ICON_COIN}${escapeHtml(item.payText)}</span>` : ""}
             </div>`
           : ""
@@ -869,14 +906,23 @@ function bindControls() {
     setFiltersOpen(false);
   });
 
-  // Delega degli eventi sui pulsanti "Interessa"/"Non interessa": le card vengono ricreate ad ogni
-  // renderList(), quindi il listener va agganciato al contenitore #list.
+  // Delega degli eventi sui pulsanti "Interessa"/"Non interessa" e
+  // sull'etichetta di luogo: le card vengono ricreate ad ogni renderList(),
+  // quindi i listener vanno agganciati al contenitore #list.
   $("#list").addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".interest-btn");
-    if (!btn) return;
     const card = ev.target.closest(".card");
     if (!card) return;
-    setInterest(card.dataset.id, btn.dataset.action);
+
+    const interestBtn = ev.target.closest(".interest-btn");
+    if (interestBtn) {
+      setInterest(card.dataset.id, interestBtn.dataset.action);
+      return;
+    }
+
+    const locateBtn = ev.target.closest(".meta-pill-locate");
+    if (locateBtn) {
+      jumpToMapMarker(card.dataset.id);
+    }
   });
 
   const exportBtn = $("#exportPrefsBtn");

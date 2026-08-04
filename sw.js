@@ -1,7 +1,7 @@
 // Service worker minimale: rende l'app installabile e utilizzabile offline
 // (mostra l'ultima lista scaricata anche senza connessione).
 
-const CACHE = "phdtracker-v8";
+const CACHE = "phdtracker-v9";
 const SHELL = ["./", "index.html", "style.css", "app.js", "manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
