@@ -329,7 +329,13 @@ segna come lette per non rileggerle al giro successivo.
 specifica per il loro formato (un elenco puntato con il titolo
 dell'annuncio seguito dalla URL sulla riga successiva) e riconosce
 correttamente ogni annuncio con titolo e link giusti, ignorando i link di
-gestione/disiscrizione in fondo all'email. Per FindAPhD il template esatto
+gestione/disiscrizione in fondo all'email. **Una singola email può
+contenere più annunci diversi** (è normale: EURAXESS raggruppa tutti i
+risultati nuovi della ricerca salvata in un'unica email) — lo script legge
+l'intero elenco puntato riga per riga e cataloga **ognuno** degli annunci
+trovati, non solo il primo; verificato leggendo l'esempio reale caricato
+(4 annunci distinti in un'unica email, estratti tutti correttamente) e
+ri-confermato con un test dedicato. Per FindAPhD il template esatto
 non è ancora stato verificato: l'estrazione resta quella generica (cerca i
 link il cui indirizzo corrisponde al formato stabile di un singolo annuncio,
 `findaphd.com/phds/project/...`) — non estrae automaticamente scadenza o
@@ -408,6 +414,17 @@ sito: se un annuncio non viene coperto in un'esecuzione, ci riprova in
 quella successiva). Una volta tentato — con o senza successo — l'annuncio
 non viene più ritentato in eterno ad ogni esecuzione.
 
+Nella pagina del singolo annuncio, lo script cerca prima i dati
+strutturati "JobPosting" (schema.org, formato `JSON-LD` pensato per i
+motori di ricerca) quando presenti: se ci sono, il nome del datore di
+lavoro e la sede arrivano da lì, puliti e senza ambiguità. In aggiunta
+(non in alternativa, per sicurezza), legge anche fino a 12.000 caratteri
+del testo visibile della pagina — un tetto precedente, più basso, tagliava
+via il nome dell'ente in diversi casi reali (es. "Helmholtz Association of
+German Research Centers"), perché nel testo grezzo della pagina compare
+dopo menu, pulsanti "Login to bookmark" e simili, spesso oltre i primi
+7.000-9.000 caratteri.
+
 ---
 
 ## 9. Mappa dei dottorati che ti interessano
@@ -442,10 +459,10 @@ portare).
 
 Quando più annunci ricadono sulla stessa città (o sullo stesso paese, per
 quelli senza una città precisa), i segnaposto vengono automaticamente
-disposti in un piccolo cerchio invece di sovrapporsi uno sopra l'altro —
-restano tutti visibili e cliccabili singolarmente, e la mappa si zooma
-abbastanza da renderli distinguibili invece di restare a un livello troppo
-lontano per notare la differenza.
+disposti in un piccolo cerchio stretto (non uno grande) invece di
+sovrapporsi uno sopra l'altro — restano tutti visibili e cliccabili
+singolarmente, e la mappa si zooma abbastanza da renderli distinguibili
+invece di restare a un livello troppo lontano per notare la differenza.
 
 **Come funziona tecnicamente**: la mappa usa [Leaflet](https://leafletjs.com)
 (libreria open source, caricata da CDN) con le mappe di sfondo minimali di

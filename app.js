@@ -323,7 +323,7 @@ function spreadOverlappingCoords(withCoords) {
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(entry);
   }
-  const JITTER_DEG = 0.045;
+  const JITTER_DEG = 0.015;
   for (const group of groups.values()) {
     if (group.length <= 1) continue;
     const [lat0] = group[0].coords;
@@ -414,7 +414,7 @@ function renderInterestMap() {
       // quindi si centra e si zooma abbastanza da renderli distinguibili.
       const avgLat = lats.reduce((a, b) => a + b, 0) / lats.length;
       const avgLon = lons.reduce((a, b) => a + b, 0) / lons.length;
-      map.setView([avgLat, avgLon], 11);
+      map.setView([avgLat, avgLon], 12);
     } else {
       map.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 });
     }

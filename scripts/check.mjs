@@ -789,8 +789,58 @@ async function fetchJobrxivDetailText(url) {
     if (!res.ok) return "";
     const html = await res.text();
     const $ = cheerio.load(html);
-    $("script, style, nav, footer, header, noscript").remove();
-    return $("body").text().replace(/\s+/g, " ").trim().slice(0, 4000);
+
+    // Prima si cerca il blocco dati strutturato schema.org "JobPosting"
+    // (JSON-LD), quando presente: è pensato apposta per i motori di ricerca
+    // e contiene di solito il nome del datore di lavoro (hiringOrganization)
+    // e la sede (jobLocation) in campi puliti e separati — molto più
+    // affidabile di un taglio a N caratteri sul testo visibile, che dipende
+    // da quanto menu/pulsanti/form si frappongono prima del contenuto vero.
+    const jsonLdBits = [];
+    $('script[type="application/ld+json"]').each((_, el) => {
+      const raw = $(el).contents().text();
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        const candidates = Array.isArray(parsed) ? parsed : [parsed];
+        for (const entry of candidates) {
+          const type = entry?.["@type"];
+          const isJobPosting =
+            type === "JobPosting" || (Array.isArray(type) && type.includes("JobPosting"));
+          if (!isJobPosting) continue;
+          const org = entry.hiringOrganization;
+          const orgName = typeof org === "string" ? org : org?.name;
+          if (orgName) jsonLdBits.push(orgName);
+          const locations = Array.isArray(entry.jobLocation) ? entry.jobLocation : [entry.jobLocation];
+          for (const loc of locations) {
+            const addr = loc?.address;
+            if (!addr) continue;
+            if (addr.addressLocality) jsonLdBits.push(addr.addressLocality);
+            if (addr.addressRegion) jsonLdBits.push(addr.addressRegion);
+            if (addr.addressCountry) {
+              jsonLdBits.push(
+                typeof addr.addressCountry === "string" ? addr.addressCountry : addr.addressCountry?.name || ""
+              );
+            }
+          }
+        }
+      } catch {
+        // JSON-LD malformato o in un formato inatteso: si ignora, si prosegue coi fallback sotto.
+      }
+    });
+
+    $("script, style, nav, footer, header, noscript, form, aside").remove();
+    const bodyText = $("body").text().replace(/\s+/g, " ").trim();
+
+    // Il nome del datore di lavoro compare di solito vicino all'inizio del
+    // contenuto vero dell'annuncio, ma nel testo grezzo della pagina può
+    // essere preceduto da migliaia di caratteri di menu, pulsanti "Login to
+    // bookmark" e simili: un taglio troppo corto (il vecchio limite di 4000
+    // caratteri) rischiava di tagliarlo via. Si combinano quindi i dati
+    // strutturati (se trovati) con una porzione ben più ampia del testo
+    // visibile, per non perdere l'indizio in nessuno dei due casi.
+    const jsonLdText = jsonLdBits.filter(Boolean).join(" ");
+    return `${jsonLdText} ${bodyText.slice(0, 12000)}`.trim();
   } catch (err) {
     console.warn(`⚠️  jobrxiv.org (pagina annuncio) ${url}: ${err.message}`);
     return "";
