@@ -153,7 +153,7 @@ a destra quando apri il file) — non serve programmare:
   query per ciascuna parola in `keywords` + "phd".
 
 Ogni modifica al file viene applicata dal **prossimo** controllo
-automatico (entro 6 ore), oppure puoi forzarlo subito (punto 7).
+automatico (entro 6 ore), oppure puoi forzarlo subito (punto 11).
 
 ---
 
@@ -196,14 +196,14 @@ tu stesso questi file a mano, ricordati di incrementare quel numero, o il
 tuo telefono continuerà a vedere la versione vecchia. Dopo aver caricato i
 file su GitHub, chiudi del tutto l'app (o Safari) e riaprila: nel giro di
 pochi secondi dovrebbe aggiornarsi da sola. Se proprio non si aggiorna,
-rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 12).
+rimuovila dalla schermata Home e rifai "Aggiungi a Home" (punto 14).
 
 ---
 
 ## 7. Alert email nativi (EURAXESS, FindAPhD) senza usare la tua mail personale
 
 EURAXESS e FindAPhD non si possono raschiare automaticamente (il loro
-`robots.txt` lo vieta, vedi punto 10 "Limiti noti"), ma entrambi offrono un
+`robots.txt` lo vieta, vedi punto 12 "Limiti noti"), ma entrambi offrono un
 loro alert nativo via email quando esce un nuovo annuncio che corrisponde
 a una tua ricerca salvata. Per farli confluire nella stessa app e nella
 stessa notifica ntfy di tutto il resto — invece di controllare a mano una
@@ -221,15 +221,44 @@ viola nessun `robots.txt` né termine di servizio.
 ### 7.1 Crea una casella email dedicata
 
 Usa un indirizzo **nuovo, mai usato altrove**, così non condividi la tua
-mail personale con nessuno script né con EURAXESS/FindAPhD. Il modo più
-semplice: crea un nuovo account Gmail gratuito solo per questo (es.
-`tuonome.phdalerts@gmail.com`). Va benissimo anche un altro provider,
-purché supporti IMAP (Outlook/Hotmail, Yahoo, ecc.) — negli esempi sotto
-uso Gmail perché è il più comune.
+mail personale con nessuno script né con EURAXESS/FindAPhD.
 
-### 7.2 Genera una "app password" IMAP (non la password normale)
+**Consigliato per semplicità: [GMX](https://www.gmx.com/mail/create-email-address/)**
+(o il suo gemello [mail.com](https://www.mail.com), stessa azienda). A
+differenza di Gmail non richiede di attivare la verifica in due passaggi
+né di generare una password separata: basta creare l'account gratuito
+(un numero di telefono non è obbligatorio, si può verificare con
+un'altra email di recupero) e usare **la password normale dell'account**
+anche per IMAP — un solo passaggio in più rispetto alla creazione
+dell'account (punto 7.2).
 
-Gmail richiede una password dedicata per l'accesso via app/script:
+Se preferisci comunque Gmail va benissimo lo stesso, richiede solo un
+paio di passaggi extra (verifica in due passaggi + "app password") — li
+trovi in fondo a questa sezione, al punto 7.2bis.
+
+**Da evitare: Outlook/Hotmail.** Microsoft sta eliminando l'accesso IMAP
+con semplice utente/password (comprese le app password) su tutti gli
+account Outlook.com nel corso del 2026, richiedendo al suo posto un
+sistema di autenticazione (OAuth2) che lo script non supporta: rischi di
+configurarlo e vederlo smettere di funzionare da solo poco dopo.
+
+### 7.2 Attiva l'accesso IMAP
+
+**Se hai scelto GMX/mail.com:**
+
+1. Accedi alla webmail del nuovo account.
+2. Vai su **Impostazioni (Settings) → POP3 & IMAP**.
+3. Attiva l'opzione "Invia e ricevi email tramite programmi esterni"
+   (in inglese: "Send and receive emails via external program"/"Enable
+   POP3/IMAP access").
+4. Da questo momento l'IMAP host è `imap.gmx.com` (o `imap.mail.com` se
+   hai scelto mail.com), porta `993` — segnati quale dei due hai usato,
+   ti serve al punto 7.4.
+
+### 7.2bis Se invece usi Gmail: genera una "app password" IMAP
+
+Gmail non permette di usare la password normale per IMAP, richiede una
+password dedicata:
 
 1. Sul nuovo account, vai su **myaccount.google.com/security** e attiva
    la **verifica in due passaggi** (obbligatoria per generare app
@@ -238,8 +267,6 @@ Gmail richiede una password dedicata per l'accesso via app/script:
    password (nome libero, es. "PhD Tracker"), e copia il codice di 16
    caratteri che ti mostra — è quella la password da usare, non quella
    del tuo account.
-3. Se usi un altro provider, cerca "app password IMAP" nelle impostazioni
-   di sicurezza del tuo provider: il concetto è lo stesso.
 
 ### 7.3 Imposta gli alert nativi su questo nuovo indirizzo
 
@@ -258,11 +285,12 @@ Nel repository, **Settings → Secrets and variables → Actions → New
 repository secret**, aggiungi:
 
 - `IMAP_USER`: l'indirizzo email dedicato (es.
-  `tuonome.phdalerts@gmail.com`)
-- `IMAP_PASSWORD`: l'app password di 16 caratteri del punto 7.2 (**non**
-  la password normale dell'account)
-- `IMAP_HOST` (facoltativo): solo se non usi Gmail. Per Gmail non
-  serve, viene usato `imap.gmail.com` automaticamente.
+  `tuonome.phdalerts@gmx.com`)
+- `IMAP_PASSWORD`: con GMX/mail.com la normale password dell'account; con
+  Gmail l'app password di 16 caratteri del punto 7.2bis (**non** la
+  password normale dell'account)
+- `IMAP_HOST`: con GMX metti `imap.gmx.com`, con mail.com `imap.mail.com`.
+  Con Gmail puoi ometterlo (viene usato `imap.gmail.com` automaticamente).
 
 Queste credenziali non finiscono mai nel codice pubblico del repository:
 restano solo nei Secrets, visibili solo alle Actions durante l'esecuzione.
@@ -286,7 +314,7 @@ in:
 ```
 
 Dal controllo automatico successivo (entro 6 ore, o forza subito col
-punto 9), lo script si collega alla casella, legge le email non lette che
+punto 11), lo script si collega alla casella, legge le email non lette che
 contengono link a un annuncio EURAXESS o FindAPhD, le fa comparire
 nell'app esattamente come le altre fonti (con notifica ntfy inclusa), e le
 segna come lette per non rileggerle al giro successivo.
@@ -306,7 +334,72 @@ posso aggiustare l'estrazione.
 
 ---
 
-## 8. Cambiare la frequenza di controllo
+## 8. Città riconosciute automaticamente (anche per dottorati condivisi tra più sedi)
+
+Oltre al paese, lo script confronta il testo di ogni annuncio con un elenco
+di circa 200 tra le principali città universitarie/capitali europee
+(`scripts/check.mjs`, costante `CITIES`) per mostrare il luogo "in chiaro"
+sulla card, non solo il paese.
+
+A differenza della versione precedente, ora vengono cercate **tutte** le
+città riconosciute nel testo, non solo la prima — pensato apposta per i
+dottorati condivisi tra più sedi (tipici delle reti **MSCA Doctoral
+Networks** e dei dottorati in cotutela), che spesso elencano più università
+in più paesi. Se ne trova più di una, le mostra tutte separate da virgola,
+con il paese tra parentesi accanto a ciascuna quando sono in paesi diversi
+— es. "Bologna (Italy), Groningen (Netherlands), Berlin (Germany)".
+
+Il confronto è **case-sensitive** (richiede l'iniziale maiuscola): diverse
+città coincidono con parole inglesi comuni (es. "split", "nice"), e
+richiedere la maiuscola riduce molto i falsi positivi (una frase come "the
+position is split between two campuses" non fa scattare nulla, ma "Split,
+Croatia" sì). Per lo stesso motivo alcune città sono state escluse di
+proposito dall'elenco perché ambigue anche da maiuscole — "Nice", "Bath",
+"Reading", "York" (sottostringa di "New York"), "Nancy" (nome di persona),
+"Tours": per queste si può ancora ottenere un risultato tramite il vecchio
+metodo di riserva (ricerca "Città, Paese" nel testo), ma con affidabilità
+minore.
+
+Se una città che ti interessa non compare mai riconosciuta, puoi
+aggiungerla tu stesso all'elenco `CITIES` in `scripts/check.mjs` (formato
+`["NomeCittà", "NomePaese"]`, il nome del paese deve corrispondere a uno di
+quelli usati altrove nel file, es. "Italy", "Netherlands").
+
+---
+
+## 9. Esportare e importare le preferenze (interesse, filtri)
+
+In fondo alla pagina, sezione **"Preferenze (interesse, filtri)"**, trovi
+due pulsanti:
+
+- **Esporta preferenze**: scarica un file `.json` con tutto quello che hai
+  impostato su questo dispositivo — quali annunci hai segnato
+  interessa/non interessa, il filtro materia/paese/stato attivo, la
+  ricerca testuale, il toggle "solo novità".
+- **Importa preferenze**: carica un file esportato in precedenza (da questo
+  stesso dispositivo o da un altro) e lo applica subito, senza bisogno di
+  ricaricare la pagina.
+
+Serve perché queste preferenze vivono solo nella memoria del browser
+(`localStorage`) di questo dispositivo, come già spiegato al punto 6: non
+sono nel repository, quindi normalmente andrebbero perse se cambi telefono
+o cancelli i dati del browser. Esportando puoi:
+
+- portarle su un altro dispositivo (es. dal telefono al tablet, o su un
+  telefono nuovo);
+- farne un backup prima di cancellare i dati di Safari;
+- tenerne più copie nel tempo, se vuoi.
+
+Il file esportato contiene solo le tue preferenze (etichette
+interessa/scartato, filtri) — non contiene l'elenco degli annunci in sé
+(quello arriva sempre da `data/listings.json`, aggiornato automaticamente).
+Se il file che importi non è valido o non è stato esportato da questa app,
+compare un messaggio d'errore sotto ai pulsanti e non viene applicato
+nulla.
+
+---
+
+## 10. Cambiare la frequenza di controllo
 
 Modifica la riga `cron` in `.github/workflows/check.yml`. Esempi:
 
@@ -319,7 +412,7 @@ all'ora italiana estiva.)
 
 ---
 
-## 9. Testare subito, senza aspettare
+## 11. Testare subito, senza aspettare
 
 Vai su **Actions** (in alto nel repository) → clicca sul workflow
 "Controllo bandi dottorato" → **Run workflow** → **Run workflow**. Parte
@@ -332,7 +425,7 @@ in poi, ricevi una notifica solo per le novità vere.
 
 ---
 
-## 10. Limiti noti (onestamente)
+## 12. Limiti noti (onestamente)
 
 - **EURAXESS** e **FindAPhD** non vengono raschiati direttamente dal sito:
   il loro `robots.txt` chiede esplicitamente ai crawler di non farlo, e ho
@@ -394,7 +487,7 @@ in poi, ricevi una notifica solo per le novità vere.
 
 ---
 
-## 11. Struttura del progetto
+## 13. Struttura del progetto
 
 ```
 phd-tracker/
@@ -418,7 +511,7 @@ phd-tracker/
 
 ---
 
-## 12. Aggiungere l'app alla schermata Home (iPhone)
+## 14. Aggiungere l'app alla schermata Home (iPhone)
 
 1. Apri `https://TUO-USERNAME.github.io/phd-tracker/` in **Safari** (deve
    essere Safari, non Chrome, perché su iOS solo Safari può installare
