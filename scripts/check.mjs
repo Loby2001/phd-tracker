@@ -985,10 +985,23 @@ async function main() {
   const newItems = matched.filter((it) => !seen.has(it.id));
   console.log(`${newItems.length} sono nuovi rispetto all'ultima esecuzione.`);
 
+  // Ricalcola paese/città/paga anche per gli annunci GIÀ salvati (non solo
+  // per quelli nuovi): senza questo passaggio, un miglioramento
+  // all'estrazione (come la correzione del bug sui testi TUTTO MAIUSCOLO)
+  // si applicherebbe solo alle offerte trovate da ora in poi, lasciando per
+  // sempre "vuoti" gli annunci già presenti in data/listings.json da prima.
+  // È un ricalcolo economico (solo regex sul testo già salvato, nessuna
+  // richiesta di rete), quindi lo si fa ad ogni esecuzione.
+  const backfilledListings = listings.map((it) => {
+    const { country, city } = deriveLocation(it);
+    const payText = extractPay(`${it.title} ${it.description}`);
+    return { ...it, country, city, payText };
+  });
+
   // Aggiorna listings.json: metti i nuovi in testa, tieni gli esistenti, cappa la lunghezza
   const now = new Date().toISOString();
   const withTimestamps = newItems.map((it) => ({ ...it, firstSeen: now }));
-  const merged = [...withTimestamps, ...listings].slice(0, MAX_LISTINGS);
+  const merged = [...withTimestamps, ...backfilledListings].slice(0, MAX_LISTINGS);
 
   // Aggiorna seen: aggiungi tutti gli id trovati in questa run (non solo i nuovi)
   for (const it of matched) seen.add(it.id);
