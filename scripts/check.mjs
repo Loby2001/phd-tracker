@@ -229,8 +229,187 @@ function extractCity(text, countryRaw) {
   return null;
 }
 
+// ---------------------------------------------------------------------------
+// Città — elenco delle principali città universitarie/capitali europee, per
+// riconoscere il luogo "in chiaro" anche quando il testo non segue il
+// pattern rigido "Città, Paese" usato da extractCity qui sopra. Serve
+// soprattutto per i dottorati condivisi tra più sedi (es. le reti MSCA
+// Doctoral Networks, che spesso elencano più università in più paesi senza
+// una struttura di testo fissa): qui si cercano TUTTE le città note nel
+// testo, non solo la prima vicino al nome del paese.
+//
+// A differenza del confronto sui paesi, qui il confronto è case-sensitive
+// (richiede l'iniziale maiuscola): diverse città coincidono con parole o
+// nomi inglesi comuni (es. "split"/"Split", "nice"/"Nice") e richiedere la
+// maiuscola riduce molto i falsi positivi. Alcune città sono comunque state
+// escluse deliberatamente perché ambigue anche da maiuscole — "Nice"
+// (aggettivo), "Bath", "Reading", "Hull", "Derby", "York" (sottostringa di
+// "New York"), "Nancy" (nome di persona, frequente nei riferimenti ai
+// ricercatori), "Tours" (plurale di "tour"): meglio ometterle che rischiare
+// di mostrare un luogo sbagliato.
+const CITIES = [
+  // Regno Unito / Irlanda
+  ["London", "United Kingdom"], ["Manchester", "United Kingdom"], ["Birmingham", "United Kingdom"],
+  ["Edinburgh", "United Kingdom"], ["Glasgow", "United Kingdom"], ["Liverpool", "United Kingdom"],
+  ["Leeds", "United Kingdom"], ["Sheffield", "United Kingdom"], ["Bristol", "United Kingdom"],
+  ["Oxford", "United Kingdom"], ["Cambridge", "United Kingdom"], ["Nottingham", "United Kingdom"],
+  ["Southampton", "United Kingdom"], ["Newcastle", "United Kingdom"], ["Cardiff", "United Kingdom"],
+  ["Belfast", "United Kingdom"], ["Leicester", "United Kingdom"], ["Coventry", "United Kingdom"],
+  ["Exeter", "United Kingdom"], ["Durham", "United Kingdom"], ["Warwick", "United Kingdom"],
+  ["Aberdeen", "United Kingdom"], ["Dundee", "United Kingdom"], ["Loughborough", "United Kingdom"],
+  ["Lancaster", "United Kingdom"], ["Swansea", "United Kingdom"], ["Bangor", "United Kingdom"],
+  ["Dublin", "Ireland"], ["Cork", "Ireland"], ["Galway", "Ireland"], ["Limerick", "Ireland"],
+
+  // Italia
+  ["Roma", "Italy"], ["Rome", "Italy"], ["Milano", "Italy"], ["Milan", "Italy"],
+  ["Torino", "Italy"], ["Turin", "Italy"], ["Bologna", "Italy"], ["Firenze", "Italy"],
+  ["Florence", "Italy"], ["Napoli", "Italy"], ["Naples", "Italy"], ["Padova", "Italy"],
+  ["Padua", "Italy"], ["Venezia", "Italy"], ["Venice", "Italy"], ["Genova", "Italy"],
+  ["Genoa", "Italy"], ["Trieste", "Italy"], ["Trento", "Italy"], ["Verona", "Italy"],
+  ["Brescia", "Italy"], ["Bergamo", "Italy"], ["Pavia", "Italy"], ["Parma", "Italy"],
+  ["Modena", "Italy"], ["Ferrara", "Italy"], ["Perugia", "Italy"], ["Siena", "Italy"],
+  ["Pisa", "Italy"], ["Cagliari", "Italy"], ["Sassari", "Italy"], ["Palermo", "Italy"],
+  ["Catania", "Italy"], ["Bari", "Italy"], ["Lecce", "Italy"], ["Salerno", "Italy"],
+  ["Udine", "Italy"], ["Ancona", "Italy"], ["Camerino", "Italy"], ["Urbino", "Italy"],
+  ["Chieti", "Italy"], ["L'Aquila", "Italy"], ["Novara", "Italy"], ["Varese", "Italy"],
+  ["Piacenza", "Italy"], ["Cremona", "Italy"],
+
+  // Germania
+  ["Berlin", "Germany"], ["Munich", "Germany"], ["München", "Germany"], ["Hamburg", "Germany"],
+  ["Cologne", "Germany"], ["Köln", "Germany"], ["Frankfurt", "Germany"], ["Stuttgart", "Germany"],
+  ["Düsseldorf", "Germany"], ["Dusseldorf", "Germany"], ["Leipzig", "Germany"], ["Dresden", "Germany"],
+  ["Hannover", "Germany"], ["Bremen", "Germany"], ["Bonn", "Germany"], ["Heidelberg", "Germany"],
+  ["Freiburg", "Germany"], ["Tübingen", "Germany"], ["Tubingen", "Germany"], ["Göttingen", "Germany"],
+  ["Gottingen", "Germany"], ["Mainz", "Germany"], ["Karlsruhe", "Germany"], ["Erlangen", "Germany"],
+  ["Würzburg", "Germany"], ["Wurzburg", "Germany"], ["Jena", "Germany"], ["Konstanz", "Germany"],
+  ["Marburg", "Germany"], ["Aachen", "Germany"], ["Bochum", "Germany"], ["Kiel", "Germany"],
+  ["Regensburg", "Germany"], ["Rostock", "Germany"], ["Potsdam", "Germany"], ["Duisburg", "Germany"],
+  ["Essen", "Germany"], ["Bielefeld", "Germany"], ["Giessen", "Germany"],
+  ["Magdeburg", "Germany"], ["Greifswald", "Germany"], ["Halle", "Germany"],
+
+  // Francia
+  ["Paris", "France"], ["Lyon", "France"], ["Marseille", "France"], ["Toulouse", "France"],
+  ["Bordeaux", "France"], ["Lille", "France"], ["Strasbourg", "France"], ["Nantes", "France"],
+  ["Montpellier", "France"], ["Grenoble", "France"], ["Rennes", "France"], ["Dijon", "France"],
+  ["Avignon", "France"], ["Angers", "France"], ["Reims", "France"], ["Orléans", "France"],
+  ["Orleans", "France"], ["Clermont-Ferrand", "France"], ["Amiens", "France"], ["Limoges", "France"],
+  ["Metz", "France"], ["Besançon", "France"], ["Besancon", "France"], ["Perpignan", "France"],
+  ["Caen", "France"], ["Poitiers", "France"], ["Nîmes", "France"], ["Nimes", "France"],
+  ["Le Havre", "France"], ["Saclay", "France"], ["Palaiseau", "France"], ["Évry", "France"],
+
+  // Spagna
+  ["Madrid", "Spain"], ["Barcelona", "Spain"], ["Valencia", "Spain"], ["Sevilla", "Spain"],
+  ["Seville", "Spain"], ["Zaragoza", "Spain"], ["Málaga", "Spain"], ["Malaga", "Spain"],
+  ["Bilbao", "Spain"], ["Granada", "Spain"], ["Salamanca", "Spain"], ["Valladolid", "Spain"],
+  ["Santiago de Compostela", "Spain"], ["San Sebastián", "Spain"], ["San Sebastian", "Spain"],
+  ["Pamplona", "Spain"], ["Oviedo", "Spain"], ["Murcia", "Spain"], ["Alicante", "Spain"],
+  ["Córdoba", "Spain"], ["Cordoba", "Spain"], ["Tarragona", "Spain"], ["Girona", "Spain"],
+  ["Vigo", "Spain"], ["Cadiz", "Spain"], ["Cádiz", "Spain"],
+
+  // Portogallo
+  ["Lisboa", "Portugal"], ["Lisbon", "Portugal"], ["Porto", "Portugal"], ["Coimbra", "Portugal"],
+  ["Braga", "Portugal"], ["Aveiro", "Portugal"], ["Évora", "Portugal"], ["Evora", "Portugal"],
+
+  // Paesi Bassi
+  ["Amsterdam", "Netherlands"], ["Rotterdam", "Netherlands"], ["Utrecht", "Netherlands"],
+  ["Delft", "Netherlands"], ["Groningen", "Netherlands"], ["Leiden", "Netherlands"],
+  ["Maastricht", "Netherlands"], ["Nijmegen", "Netherlands"], ["Eindhoven", "Netherlands"],
+  ["Wageningen", "Netherlands"], ["Tilburg", "Netherlands"], ["The Hague", "Netherlands"],
+  ["Den Haag", "Netherlands"],
+
+  // Belgio / Lussemburgo
+  ["Brussels", "Belgium"], ["Bruxelles", "Belgium"], ["Leuven", "Belgium"], ["Ghent", "Belgium"],
+  ["Gent", "Belgium"], ["Antwerp", "Belgium"], ["Antwerpen", "Belgium"], ["Liège", "Belgium"],
+  ["Liege", "Belgium"], ["Namur", "Belgium"], ["Mons", "Belgium"], ["Luxembourg", "Luxembourg"],
+
+  // Svizzera / Austria
+  ["Zurich", "Switzerland"], ["Zürich", "Switzerland"], ["Geneva", "Switzerland"],
+  ["Genève", "Switzerland"], ["Lausanne", "Switzerland"], ["Basel", "Switzerland"],
+  ["Bern", "Switzerland"], ["Fribourg", "Switzerland"],
+  ["Vienna", "Austria"], ["Wien", "Austria"], ["Graz", "Austria"], ["Innsbruck", "Austria"],
+  ["Linz", "Austria"], ["Salzburg", "Austria"], ["Klagenfurt", "Austria"],
+
+  // Scandinavia / Nord Europa
+  ["Stockholm", "Sweden"], ["Gothenburg", "Sweden"], ["Göteborg", "Sweden"], ["Uppsala", "Sweden"],
+  ["Lund", "Sweden"], ["Umeå", "Sweden"], ["Umea", "Sweden"], ["Linköping", "Sweden"],
+  ["Copenhagen", "Denmark"], ["København", "Denmark"], ["Aarhus", "Denmark"], ["Odense", "Denmark"],
+  ["Aalborg", "Denmark"], ["Oslo", "Norway"], ["Bergen", "Norway"], ["Trondheim", "Norway"],
+  ["Tromsø", "Norway"], ["Tromso", "Norway"], ["Helsinki", "Finland"], ["Espoo", "Finland"],
+  ["Tampere", "Finland"], ["Turku", "Finland"], ["Oulu", "Finland"], ["Jyväskylä", "Finland"],
+  ["Reykjavik", "Iceland"],
+
+  // Europa centrale / orientale
+  ["Warsaw", "Poland"], ["Warszawa", "Poland"], ["Kraków", "Poland"], ["Krakow", "Poland"],
+  ["Wrocław", "Poland"], ["Wroclaw", "Poland"], ["Poznań", "Poland"], ["Poznan", "Poland"],
+  ["Gdańsk", "Poland"], ["Gdansk", "Poland"], ["Łódź", "Poland"], ["Lodz", "Poland"],
+  ["Prague", "Czech Republic"], ["Praha", "Czech Republic"], ["Brno", "Czech Republic"],
+  ["Olomouc", "Czech Republic"], ["Bratislava", "Slovakia"], ["Košice", "Slovakia"],
+  ["Kosice", "Slovakia"], ["Budapest", "Hungary"], ["Debrecen", "Hungary"], ["Szeged", "Hungary"],
+  ["Ljubljana", "Slovenia"], ["Maribor", "Slovenia"], ["Zagreb", "Croatia"], ["Split", "Croatia"],
+  ["Rijeka", "Croatia"], ["Bucharest", "Romania"], ["București", "Romania"], ["Cluj-Napoca", "Romania"],
+  ["Timișoara", "Romania"], ["Timisoara", "Romania"], ["Iași", "Romania"], ["Iasi", "Romania"],
+  ["Sofia", "Bulgaria"], ["Plovdiv", "Bulgaria"], ["Athens", "Greece"], ["Athina", "Greece"],
+  ["Thessaloniki", "Greece"], ["Patras", "Greece"], ["Heraklion", "Greece"], ["Tallinn", "Estonia"],
+  ["Tartu", "Estonia"], ["Riga", "Latvia"], ["Vilnius", "Lithuania"], ["Kaunas", "Lithuania"],
+  ["Valletta", "Malta"], ["Nicosia", "Cyprus"], ["Belgrade", "Serbia"], ["Beograd", "Serbia"],
+  ["Novi Sad", "Serbia"], ["Kyiv", "Ukraine"], ["Kiev", "Ukraine"], ["Lviv", "Ukraine"],
+  ["Istanbul", "Turkey"], ["Ankara", "Turkey"], ["Izmir", "Turkey"],
+];
+
+// Città più lunghe prima (utile per nomi composti come "San Sebastián").
+const CITY_PATTERNS = CITIES.slice()
+  .sort((a, b) => b[0].length - a[0].length)
+  .map(([city, country]) => ({
+    city,
+    country,
+    re: new RegExp(`\\b${city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`), // case-sensitive di proposito
+  }));
+
+// Cerca TUTTE le città riconosciute nel testo (non solo la prima), utile
+// per i dottorati condivisi tra più sedi. Deduplica per nome, mantiene
+// l'ordine di comparsa nel testo, cappa a un numero ragionevole di
+// risultati per non riempire la card con un elenco di partner infinito.
+function extractCities(text) {
+  if (!text) return [];
+  const found = [];
+  const seenCities = new Set();
+  for (const { city, country, re } of CITY_PATTERNS) {
+    if (seenCities.has(city)) continue;
+    const m = text.match(re);
+    if (!m) continue;
+    seenCities.add(city);
+    found.push({ city, country, index: m.index });
+  }
+  found.sort((a, b) => a.index - b.index);
+  return found.slice(0, 6);
+}
+
 function deriveLocation(item) {
   const hay = `${item.title} ${item.description} ${item.source}`;
+
+  const cityMatches = extractCities(hay);
+  if (cityMatches.length > 0) {
+    const uniqueCountries = Array.from(new Set(cityMatches.map((m) => m.country)));
+    const country = item.countryHint || uniqueCountries[0];
+    let city;
+    if (cityMatches.length === 1) {
+      city = cityMatches[0].city;
+    } else {
+      // Dottorato con più sedi: mostra tutte le città trovate. Se sono in
+      // paesi diversi, aggiunge il paese accanto a ciascuna per chiarezza
+      // (es. "Bologna (Italy), Groningen (Netherlands)").
+      const sameCountry = uniqueCountries.length <= 1;
+      const capped = cityMatches.slice(0, 4);
+      city = capped.map((m) => (sameCountry ? m.city : `${m.city} (${m.country})`)).join(", ");
+      if (cityMatches.length > capped.length) {
+        city += ` +${cityMatches.length - capped.length}`;
+      }
+    }
+    return { country, city };
+  }
+
+  // Fallback: nessuna città dell'elenco riconosciuta nel testo, si ripiega
+  // sul vecchio metodo (solo nome del paese + adiacenza testuale).
   if (item.countryHint) {
     return { country: item.countryHint, city: extractCity(hay, item.countryHint) };
   }

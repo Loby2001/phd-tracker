@@ -242,6 +242,13 @@ function deadlineLineText(item) {
 }
 
 function locationText(item) {
+  if (item.city && item.city.includes(",")) {
+    // Dottorato con più sedi (es. reti MSCA): lo script mette già il nome
+    // di ciascuna città nel campo "city", con il paese tra parentesi
+    // accanto quando le sedi sono in paesi diversi — non serve ripetere
+    // ancora il paese principale in coda.
+    return item.city;
+  }
   if (item.city && item.country) return `${item.city}, ${item.country}`;
   if (item.country) return item.country;
   return null;
@@ -351,6 +358,111 @@ function renderManualLinks() {
     .join("");
 }
 
+// ---------------------------------------------------------------------------
+// Esporta/importa preferenze — permette di portare interesse/scartati e
+// filtri su un altro dispositivo, o di farne un backup prima di cancellare
+// i dati del browser (le preferenze vivono solo in localStorage, quindi
+// altrimenti andrebbero perse).
+// ---------------------------------------------------------------------------
+const PREF_KEYS = {
+  chip: "phdtracker.chip",
+  country: "phdtracker.country",
+  status: "phdtracker.status",
+  search: "phdtracker.search",
+  onlyNew: "phdtracker.onlyNew",
+  interest: "phdtracker.interest",
+};
+
+function setPrefsStatus(message, isError) {
+  const el = $("#prefsStatus");
+  if (!el) return;
+  el.textContent = message;
+  el.classList.toggle("prefs-status-error", !!isError);
+}
+
+function exportPreferences() {
+  const data = {
+    app: "phd-tracker",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    chip: localStorage.getItem(PREF_KEYS.chip),
+    country: localStorage.getItem(PREF_KEYS.country),
+    status: localStorage.getItem(PREF_KEYS.status),
+    search: localStorage.getItem(PREF_KEYS.search),
+    onlyNew: localStorage.getItem(PREF_KEYS.onlyNew),
+    interest: loadInterest(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const stamp = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `phd-tracker-preferenze-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  setPrefsStatus("Preferenze esportate.", false);
+}
+
+function applyImportedPreferences(data) {
+  if (typeof data.chip === "string") {
+    localStorage.setItem(PREF_KEYS.chip, data.chip);
+    state.activeChip = data.chip;
+  }
+  if (typeof data.country === "string") {
+    localStorage.setItem(PREF_KEYS.country, data.country);
+    state.activeCountry = data.country;
+  }
+  if (typeof data.status === "string") {
+    localStorage.setItem(PREF_KEYS.status, data.status);
+    state.activeStatus = data.status;
+  }
+  if (typeof data.search === "string") {
+    localStorage.setItem(PREF_KEYS.search, data.search);
+    state.search = data.search;
+  }
+  if (typeof data.onlyNew === "string") {
+    localStorage.setItem(PREF_KEYS.onlyNew, data.onlyNew);
+    state.onlyNew = data.onlyNew === "1";
+  }
+  if (data.interest && typeof data.interest === "object" && !Array.isArray(data.interest)) {
+    localStorage.setItem(PREF_KEYS.interest, JSON.stringify(data.interest));
+    state.interest = data.interest;
+  }
+
+  // Riallinea i controlli visibili senza ricaricare la pagina.
+  const searchBox = $("#searchBox");
+  if (searchBox) searchBox.value = state.search;
+  const onlyNewToggle = $("#onlyNewToggle");
+  if (onlyNewToggle) onlyNewToggle.checked = state.onlyNew;
+  renderChips();
+  renderCountryChips();
+  renderStatusChips();
+  renderList();
+}
+
+function importPreferencesFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(String(reader.result || ""));
+      if (!data || typeof data !== "object" || Array.isArray(data)) {
+        throw new Error("il file non contiene un oggetto JSON valido");
+      }
+      applyImportedPreferences(data);
+      setPrefsStatus("Preferenze importate correttamente.", false);
+    } catch (err) {
+      setPrefsStatus(
+        `Impossibile importare il file: ${err.message}. Assicurati sia un file esportato da questa app.`,
+        true
+      );
+    }
+  };
+  reader.onerror = () => setPrefsStatus("Impossibile leggere il file selezionato.", true);
+  reader.readAsText(file);
+}
+
 function bindControls() {
   const searchBox = $("#searchBox");
   searchBox.value = state.search;
@@ -381,6 +493,20 @@ function bindControls() {
     if (!card) return;
     setInterest(card.dataset.id, btn.dataset.action);
   });
+
+  const exportBtn = $("#exportPrefsBtn");
+  if (exportBtn) exportBtn.addEventListener("click", exportPreferences);
+
+  const importBtn = $("#importPrefsBtn");
+  const importInput = $("#importPrefsInput");
+  if (importBtn && importInput) {
+    importBtn.addEventListener("click", () => importInput.click());
+    importInput.addEventListener("change", () => {
+      const file = importInput.files && importInput.files[0];
+      if (file) importPreferencesFromFile(file);
+      importInput.value = ""; // permette di reimportare lo stesso file una seconda volta
+    });
+  }
 }
 
 async function init() {

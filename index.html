@@ -56,6 +56,21 @@
     <div id="manualLinks"></div>
   </section>
 
+  <section class="manual" id="prefsSection">
+    <h3>Preferenze (interesse, filtri)</h3>
+    <p class="prefs-note">
+      Salvate solo su questo telefono/browser. Esportale per portarle su un
+      altro dispositivo, o come backup prima di cancellare i dati del
+      browser.
+    </p>
+    <div class="prefs-actions">
+      <button type="button" id="exportPrefsBtn" class="prefs-btn">Esporta preferenze</button>
+      <button type="button" id="importPrefsBtn" class="prefs-btn">Importa preferenze</button>
+      <input type="file" id="importPrefsInput" accept="application/json" style="display:none;" />
+    </div>
+    <p id="prefsStatus" class="prefs-status" aria-live="polite"></p>
+  </section>
+
   <footer class="app-footer">
     PhD Tracker · aggiornato automaticamente ogni 6 ore via GitHub Actions ·
     <a href="README.md">come funziona / come personalizzarlo</a>
