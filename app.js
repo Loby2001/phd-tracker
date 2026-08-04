@@ -105,24 +105,12 @@ function buildChipOptions() {
   return ["Tutte", ...Array.from(set).sort()];
 }
 
-function renderChips() {
-  const options = buildChipOptions();
-  const row = $("#chipRow");
-  row.innerHTML = "";
-  for (const opt of options) {
-    const el = document.createElement("div");
-    el.className = "chip" + (opt === state.activeChip ? " active" : "");
-    el.textContent = opt;
-    el.addEventListener("click", () => {
-      state.activeChip = opt;
-      localStorage.setItem("phdtracker.chip", opt);
-      renderChips();
-      renderList();
-    });
-    row.appendChild(el);
-  }
-}
-
+// ---------------------------------------------------------------------------
+// Filtri — un unico pulsante "Filtri" apre un pannello con tre menu a
+// tendina (Materia, Paese, Stato) più il toggle "solo novità", al posto
+// delle tre righe di chip precedenti: più compatto, soprattutto quando le
+// materie riconosciute sono tante.
+// ---------------------------------------------------------------------------
 function buildCountryOptions() {
   const set = new Set();
   for (const item of state.listings) {
@@ -131,50 +119,63 @@ function buildCountryOptions() {
   return ["Tutti i paesi", ...Array.from(set).sort()];
 }
 
-function renderCountryChips() {
-  const options = buildCountryOptions();
-  const row = $("#countryChipRow");
-  const wrap = $("#countryChipWrap");
-  if (options.length <= 1) {
-    wrap.style.display = "none"; // ancora nessun paese riconosciuto: non mostrare la riga
-    return;
-  }
-  wrap.style.display = "";
-  row.innerHTML = "";
+const STATUS_OPTIONS = ["Tutte", "Da valutare", "Mi interessano", "Scartate"];
+
+function fillSelect(select, options, activeValue, labelFor) {
+  select.innerHTML = "";
   for (const opt of options) {
-    const el = document.createElement("div");
-    el.className = "chip" + (opt === state.activeCountry ? " active" : "");
-    el.textContent = opt;
-    el.addEventListener("click", () => {
-      state.activeCountry = opt;
-      localStorage.setItem("phdtracker.country", opt);
-      renderCountryChips();
-      renderList();
-    });
-    row.appendChild(el);
+    const el = document.createElement("option");
+    el.value = opt;
+    el.textContent = labelFor ? labelFor(opt) : opt;
+    if (opt === activeValue) el.selected = true;
+    select.appendChild(el);
   }
 }
 
-const STATUS_OPTIONS = ["Tutte", "Da valutare", "Mi interessano", "Scartate"];
+function renderChips() {
+  fillSelect($("#chipSelect"), buildChipOptions(), state.activeChip);
+}
+
+function renderCountryChips() {
+  const options = buildCountryOptions();
+  const field = $("#countryFilterField");
+  if (options.length <= 1) {
+    field.style.display = "none"; // ancora nessun paese riconosciuto: non mostrare il campo
+    return;
+  }
+  field.style.display = "";
+  fillSelect($("#countrySelect"), options, state.activeCountry);
+}
 
 function renderStatusChips() {
-  const row = $("#statusChipRow");
-  if (!row) return;
-  row.innerHTML = "";
-  for (const opt of STATUS_OPTIONS) {
-    const el = document.createElement("div");
+  const select = $("#statusSelect");
+  if (!select) return;
+  fillSelect(select, STATUS_OPTIONS, state.activeStatus, (opt) => {
     let count = 0;
     if (opt === "Mi interessano") count = state.listings.filter((it) => getInterest(it.id) === "yes").length;
     else if (opt === "Scartate") count = state.listings.filter((it) => getInterest(it.id) === "no").length;
-    el.className = "chip" + (opt === state.activeStatus ? " active" : "");
-    el.textContent = count && opt !== "Tutte" && opt !== "Da valutare" ? `${opt} (${count})` : opt;
-    el.addEventListener("click", () => {
-      state.activeStatus = opt;
-      localStorage.setItem("phdtracker.status", opt);
-      renderStatusChips();
-      renderList();
-    });
-    row.appendChild(el);
+    return count && opt !== "Tutte" && opt !== "Da valutare" ? `${opt} (${count})` : opt;
+  });
+}
+
+function countActiveFilters() {
+  let n = 0;
+  if (state.activeChip !== "Tutte") n++;
+  if (state.activeCountry !== "Tutti i paesi") n++;
+  if (state.activeStatus !== "Tutte") n++;
+  if (state.onlyNew) n++;
+  return n;
+}
+
+function renderFiltersBadge() {
+  const badge = $("#filtersBadge");
+  if (!badge) return;
+  const n = countActiveFilters();
+  if (n > 0) {
+    badge.textContent = String(n);
+    badge.style.display = "";
+  } else {
+    badge.style.display = "none";
   }
 }
 
@@ -191,7 +192,7 @@ function matchesFilters(item) {
     if (state.activeStatus === "Mi interessano" && interest !== "yes") return false;
     if (state.activeStatus === "Scartate" && interest !== "no") return false;
   }
-  if (state.onlyNew && daysAgo(item.firstSeen) > 7) return false;
+  if (state.onlyNew && daysAgo(item.firstSeen) > 1) return false;
   if (state.search.trim()) {
     const hay = (item.title + " " + item.description + " " + item.source).toLowerCase();
     if (!hay.includes(state.search.trim().toLowerCase())) return false;
@@ -439,6 +440,7 @@ function applyImportedPreferences(data) {
   renderChips();
   renderCountryChips();
   renderStatusChips();
+  renderFiltersBadge();
   renderList();
 }
 
@@ -481,7 +483,51 @@ function bindControls() {
   onlyNew.addEventListener("change", () => {
     state.onlyNew = onlyNew.checked;
     localStorage.setItem("phdtracker.onlyNew", state.onlyNew ? "1" : "0");
+    renderFiltersBadge();
     renderList();
+  });
+
+  const chipSelect = $("#chipSelect");
+  chipSelect.addEventListener("change", () => {
+    state.activeChip = chipSelect.value;
+    localStorage.setItem("phdtracker.chip", state.activeChip);
+    renderFiltersBadge();
+    renderList();
+  });
+
+  const countrySelect = $("#countrySelect");
+  countrySelect.addEventListener("change", () => {
+    state.activeCountry = countrySelect.value;
+    localStorage.setItem("phdtracker.country", state.activeCountry);
+    renderFiltersBadge();
+    renderList();
+  });
+
+  const statusSelect = $("#statusSelect");
+  statusSelect.addEventListener("change", () => {
+    state.activeStatus = statusSelect.value;
+    localStorage.setItem("phdtracker.status", state.activeStatus);
+    renderFiltersBadge();
+    renderList();
+  });
+
+  // Pulsante unico "Filtri": apre/chiude il pannello con i tre menu a
+  // tendina. Si chiude anche toccando fuori dal pannello.
+  const filtersToggleBtn = $("#filtersToggleBtn");
+  const filtersPanel = $("#filtersPanel");
+  const filtersWrap = $("#filtersWrap");
+  const setFiltersOpen = (open) => {
+    filtersPanel.style.display = open ? "" : "none";
+    filtersToggleBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    filtersToggleBtn.classList.toggle("active", open);
+  };
+  filtersToggleBtn.addEventListener("click", () => {
+    setFiltersOpen(filtersPanel.style.display === "none");
+  });
+  document.addEventListener("click", (ev) => {
+    if (filtersPanel.style.display === "none") return;
+    if (filtersWrap.contains(ev.target)) return;
+    setFiltersOpen(false);
   });
 
   // Delega degli eventi sui pulsanti "Interessa"/"Non interessa": le card vengono ricreate ad ogni
@@ -516,6 +562,7 @@ async function init() {
   renderCountryChips();
   renderStatusChips();
   bindControls();
+  renderFiltersBadge();
   renderList();
   renderManualLinks();
 }

@@ -112,43 +112,83 @@ header.top h1 .mark {
   outline-offset: 1px;
 }
 
-.chip-row {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  scrollbar-width: none;
+.filters-wrap {
+  position: relative;
 }
-.chip-row::-webkit-scrollbar { display: none; }
 
-.chip {
-  flex: none;
-  padding: 7px 13px;
-  border-radius: 999px;
+.filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 10px;
   background: var(--chip-bg);
-  color: var(--text-dim);
-  font-size: 0.82rem;
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
   border: 1px solid var(--card-border);
   cursor: pointer;
-  white-space: nowrap;
-  user-select: none;
 }
 
-.chip.active {
+.filters-toggle.active {
   background: var(--chip-bg-active);
-  color: var(--text);
   border-color: var(--accent);
 }
 
-.toggle-row {
-  display: flex;
+.filters-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #f4f8ff;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.filters-panel {
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.78rem;
   color: var(--text-dim);
 }
 
-.toggle-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+.filter-field select {
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.filter-field-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.filter-field-toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
 
 main { margin-top: 18px; }
 

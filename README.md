@@ -171,9 +171,9 @@ interessa**:
 - Toccando di nuovo lo stesso pulsante annulli la scelta e l'annuncio
   torna "da valutare".
 
-Sotto ai filtri per materia/paese trovi anche una riga di filtro per
-stato — **Tutte**, **Da valutare**, **Mi interessano**, **Scartate** —
-utile per rivedere in un colpo solo tutto quello che hai scartato (per
+Aprendo il pulsante **Filtri** trovi anche un menu **Stato** —
+**Tutte**, **Da valutare**, **Mi interessano**, **Scartate** — utile
+per rivedere in un colpo solo tutto quello che hai scartato (per
 esempio se vuoi ricontrollarlo più avanti). Il filtro di default è
 "Tutte", quindi nulla sparisce mai dalla vista a meno che tu non scelga
 tu stesso di filtrare.

@@ -31,17 +31,32 @@
 
     <div class="controls">
       <input id="searchBox" class="search-input" type="search" placeholder="Cerca per parola chiave, città, ateneo…" autocomplete="off" />
-      <div id="chipRow" class="chip-row"></div>
-      <div id="countryChipWrap" style="display:none;">
-        <div id="countryChipRow" class="chip-row"></div>
+
+      <div class="filters-wrap" id="filtersWrap">
+        <button type="button" id="filtersToggleBtn" class="filters-toggle" aria-expanded="false">
+          <span>Filtri</span>
+          <span id="filtersBadge" class="filters-badge" style="display:none;"></span>
+        </button>
+
+        <div id="filtersPanel" class="filters-panel" style="display:none;">
+          <label class="filter-field">
+            <span>Materia</span>
+            <select id="chipSelect"></select>
+          </label>
+          <label class="filter-field" id="countryFilterField" style="display:none;">
+            <span>Paese</span>
+            <select id="countrySelect"></select>
+          </label>
+          <label class="filter-field">
+            <span>Stato</span>
+            <select id="statusSelect"></select>
+          </label>
+          <label class="filter-field filter-field-toggle">
+            <input type="checkbox" id="onlyNewToggle" />
+            <span>Mostra solo le novità (ultime 24 ore)</span>
+          </label>
+        </div>
       </div>
-      <div id="statusChipWrap">
-        <div id="statusChipRow" class="chip-row"></div>
-      </div>
-      <label class="toggle-row">
-        <input type="checkbox" id="onlyNewToggle" />
-        Mostra solo le novità (ultimi 7 giorni)
-      </label>
     </div>
   </header>
 
