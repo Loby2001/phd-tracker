@@ -281,6 +281,33 @@ function closeMapView() {
   document.body.style.overflow = "";
 }
 
+// Quando più annunci ricadono sulla stessa città (stesse coordinate esatte),
+// li dispone in un piccolo cerchio attorno al punto originale invece di
+// impilarli uno sopra l'altro — altrimenti risultano indistinguibili e solo
+// il segnaposto più in alto rimane cliccabile. Il raggio è pensato per
+// restare visibile ai livelli di zoom tipici con cui si guarda una singola
+// città (5-8), non per un punto qualunque della mappa.
+function spreadOverlappingCoords(withCoords) {
+  const groups = new Map();
+  for (const entry of withCoords) {
+    const key = `${entry.coords[0].toFixed(3)},${entry.coords[1].toFixed(3)}`;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(entry);
+  }
+  const JITTER_DEG = 0.045;
+  for (const group of groups.values()) {
+    if (group.length <= 1) continue;
+    const [lat0] = group[0].coords;
+    const latCorrection = Math.max(0.3, Math.cos((lat0 * Math.PI) / 180)); // longitudine "più stretta" alle alte latitudini
+    group.forEach((entry, i) => {
+      const angle = (2 * Math.PI * i) / group.length;
+      const [lat, lon] = entry.coords;
+      entry.coords = [lat + JITTER_DEG * Math.sin(angle), lon + (JITTER_DEG * Math.cos(angle)) / latCorrection];
+    });
+  }
+  return withCoords;
+}
+
 function renderInterestMap() {
   const mapEl = $("#interestMap");
   const emptyEl = $("#interestMapEmpty");
@@ -294,10 +321,12 @@ function renderInterestMap() {
   const openedAtLeastOnce = interestMap !== null || (view && view.classList.contains("open"));
   if (!openedAtLeastOnce) return;
 
-  const withCoords = state.listings
-    .filter((it) => getInterest(it.id) === "yes")
-    .map((it) => ({ item: it, coords: locationCoords(it) }))
-    .filter((x) => x.coords);
+  const withCoords = spreadOverlappingCoords(
+    state.listings
+      .filter((it) => getInterest(it.id) === "yes")
+      .map((it) => ({ item: it, coords: locationCoords(it) }))
+      .filter((x) => x.coords)
+  );
 
   if (typeof L === "undefined") {
     // Leaflet non è (ancora) caricato, es. offline al primo avvio: nessun
@@ -343,8 +372,21 @@ function renderInterestMap() {
 
   if (bounds.length === 1) {
     map.setView(bounds[0], 5);
-  } else if (bounds.length > 1) {
-    map.fitBounds(bounds, { padding: [30, 30], maxZoom: 6 });
+  } else {
+    const lats = bounds.map((b) => b[0]);
+    const lons = bounds.map((b) => b[1]);
+    const spread = Math.max(Math.max(...lats) - Math.min(...lats), Math.max(...lons) - Math.min(...lons));
+    if (spread < 0.5) {
+      // Tutti gli annunci sono nella stessa città/zona (è per questo che
+      // sono piccoli abbastanza da essere stati "sparsi" più sopra): un
+      // fitBounds userebbe uno zoom troppo lontano per vederli separati,
+      // quindi si centra e si zooma abbastanza da renderli distinguibili.
+      const avgLat = lats.reduce((a, b) => a + b, 0) / lats.length;
+      const avgLon = lons.reduce((a, b) => a + b, 0) / lons.length;
+      map.setView([avgLat, avgLon], 11);
+    } else {
+      map.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 });
+    }
   }
 
   // Leaflet calcola le dimensioni al momento dell'init: se la mappa era

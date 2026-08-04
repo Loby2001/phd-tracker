@@ -286,6 +286,8 @@ const CITIES = [
   ["Regensburg", "Germany"], ["Rostock", "Germany"], ["Potsdam", "Germany"], ["Duisburg", "Germany"],
   ["Essen", "Germany"], ["Bielefeld", "Germany"], ["Giessen", "Germany"],
   ["Magdeburg", "Germany"], ["Greifswald", "Germany"], ["Halle", "Germany"],
+  ["Jülich", "Germany"], ["Julich", "Germany"], ["Darmstadt", "Germany"],
+  ["Braunschweig", "Germany"], ["Bremerhaven", "Germany"], ["Geesthacht", "Germany"],
 
   // Francia
   ["Paris", "France"], ["Lyon", "France"], ["Marseille", "France"], ["Toulouse", "France"],
@@ -472,8 +474,29 @@ const INSTITUTIONS = [
   ["Universidade do Porto", "Porto", "Portugal"], ["Trinity College Dublin", "Dublin", "Ireland"],
   ["University College Dublin", "Dublin", "Ireland"], ["CERN", "Geneva", "Switzerland"],
   ["EMBL Heidelberg", "Heidelberg", "Germany"], ["Max Planck Institute", "Munich", "Germany"],
+  // I 18 centri di ricerca della Helmholtz Association hanno ciascuno una
+  // sede precisa (a differenza dell'associazione in sé, vedi sotto): elencati
+  // singolarmente così un annuncio che nomina il centro specifico (es.
+  // "Forschungszentrum Jülich"), invece dell'associazione generica, mostra
+  // comunque la città giusta.
+  ["Forschungszentrum Jülich", "Jülich", "Germany"], ["FZ Jülich", "Jülich", "Germany"],
+  ["Deutsches Elektronen-Synchrotron", "Hamburg", "Germany"], ["DESY", "Hamburg", "Germany"],
+  ["GSI Helmholtzzentrum", "Darmstadt", "Germany"], ["GSI Darmstadt", "Darmstadt", "Germany"],
+  ["Helmholtz-Zentrum Berlin", "Berlin", "Germany"], ["Helmholtz Munich", "Munich", "Germany"],
+  ["Helmholtz-Zentrum München", "Munich", "Germany"],
+  ["Helmholtz-Zentrum Dresden-Rossendorf", "Dresden", "Germany"],
+  ["Karlsruhe Institute of Technology", "Karlsruhe", "Germany"], ["KIT Karlsruhe", "Karlsruhe", "Germany"],
+  ["Helmholtz Centre for Environmental Research", "Leipzig", "Germany"], ["UFZ Leipzig", "Leipzig", "Germany"],
+  ["GFZ German Research Centre for Geosciences", "Potsdam", "Germany"],
+  ["Alfred Wegener Institute", "Bremerhaven", "Germany"],
+  ["Helmholtz Centre for Infection Research", "Braunschweig", "Germany"],
+  ["Max Delbrück Center", "Berlin", "Germany"],
+  ["German Cancer Research Center", "Heidelberg", "Germany"], ["DKFZ", "Heidelberg", "Germany"],
+  ["Helmholtz-Zentrum Hereon", "Geesthacht", "Germany"],
   // Reti/associazioni senza una sede unica: si riconduce solo al paese (città
-  // null), meglio che indicare una città specifica sbagliata.
+  // null), meglio che indicare una città specifica sbagliata. Riserva per
+  // quando l'annuncio nomina solo l'associazione generica, non un centro
+  // specifico tra quelli elencati sopra.
   ["Helmholtz Association", null, "Germany"], ["Helmholtz", null, "Germany"],
 ];
 
@@ -680,7 +703,15 @@ async function fetchHtmlListing(url, { hrefTest, baseUrl, minTitleLen = 8, sourc
       items.push({
         title,
         link,
-        description: context.slice(0, 500),
+        // Prima era troncato a 500 caratteri: bastava per la scadenza (di
+        // solito vicina all'inizio), ma spesso tagliava via il nome
+        // dell'ateneo/ente prima che comparisse nel testo (specialmente su
+        // jobrxiv.org, dove il titolo si ripete più volte nel blocco prima
+        // del testo utile), impedendo il riconoscimento di città/istituzioni
+        // che stanno più in fondo. 3000 caratteri coprono la stragrande
+        // maggioranza degli annunci senza appesantire troppo i dati salvati
+        // (la card in pagina mostra comunque solo un estratto più corto).
+        description: context.slice(0, 3000),
         pubDate: null,
         deadlineText,
         deadlineISO,
@@ -740,6 +771,30 @@ async function fetchJobrxivKeyword(keyword) {
     baseUrl: "https://jobrxiv.org",
     sourceLabel: `jobrxiv.org [${keyword}]`,
   });
+}
+
+// jobrxiv.org, come diversi altri portali che aggregano bandi, spesso mostra
+// il nome dell'ente/datore di lavoro (spesso l'unico indizio di luogo, es.
+// "Helmholtz Association of German Research Centers") solo nella pagina del
+// singolo annuncio, non nell'estratto della pagina di ricerca — per quanto
+// grande si faccia il testo estratto lì, quell'informazione semplicemente
+// non è presente in quella pagina. Per questo, solo quando un annuncio
+// jobrxiv.org non produce nessuna città/paese dal testo già raccolto, si
+// scarica anche la sua pagina singola (stesso dominio, stesso robots.txt
+// permissivo) e si riprova con quel testo in più. Fatto solo "on demand"
+// (non per ogni annuncio) per non moltiplicare inutilmente le richieste.
+async function fetchJobrxivDetailText(url) {
+  try {
+    const res = await fetchWithTimeout(url);
+    if (!res.ok) return "";
+    const html = await res.text();
+    const $ = cheerio.load(html);
+    $("script, style, nav, footer, header, noscript").remove();
+    return $("body").text().replace(/\s+/g, " ").trim().slice(0, 4000);
+  } catch (err) {
+    console.warn(`⚠️  jobrxiv.org (pagina annuncio) ${url}: ${err.message}`);
+    return "";
+  }
 }
 
 // bandi.mur.gov.it — portale ufficiale del Ministero italiano, elenco di
@@ -1160,7 +1215,24 @@ async function main() {
     if (isExcluded(item, config)) continue;
     if (!matchesPhdIndicator(item, config)) continue;
 
-    const { country, city } = deriveLocation(item);
+    let { country, city } = deriveLocation(item);
+
+    // jobrxiv.org spesso mostra il nome del datore di lavoro/ente (unico
+    // indizio di luogo per molti annunci, es. reti/associazioni come la
+    // "Helmholtz Association") solo nella pagina del singolo annuncio, non
+    // nell'estratto della pagina di ricerca già raccolto: se non è emerso
+    // nessun luogo dal testo già disponibile, si prova a scaricare anche
+    // quella pagina (solo per questo caso, per non moltiplicare le
+    // richieste) e si ritenta l'estrazione con quel testo in più.
+    if (!country && item.link && /^jobrxiv\.org/.test(item.source || "")) {
+      const extra = await fetchJobrxivDetailText(item.link);
+      if (extra) {
+        const retry = deriveLocation({ ...item, description: `${item.description} ${extra}` });
+        country = retry.country;
+        city = retry.city;
+      }
+    }
+
     const payText = extractPay(`${item.title} ${item.description}`);
     const withLocation = { ...item, country, city, payText };
 

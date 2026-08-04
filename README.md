@@ -382,15 +382,27 @@ quelli usati altrove nel file, es. "Italy", "Netherlands").
 
 **Università/enti noti** (`scripts/check.mjs`, costante `INSTITUTIONS`):
 molti annunci — soprattutto quelli di reti MSCA/consorzi — nominano
-l'ateneo o l'ente (es. "Sapienza", "ETH Zürich", "Sorbonne", "CERN", la
-**Helmholtz Association**) ma non
-sempre la città in modo esplicito. Un secondo elenco di circa 50 istituzioni
-europee comuni riconduce questi nomi alla città (o al paese, se l'ente non
-ha una sede unica) corrispondente, e si somma a quelle già trovate tramite
-`CITIES` — utile in particolare per i dottorati condivisi dove magari una
-sede è nominata per città e un'altra solo per nome di ateneo. Anche questo
-elenco è ampliabile allo stesso modo: aggiungi una riga `["NomeIstituzione",
-"Città", "Paese"]`.
+l'ateneo o l'ente (es. "Sapienza", "ETH Zürich", "Sorbonne", "CERN") ma non
+sempre la città in modo esplicito. Un elenco di istituzioni europee comuni
+riconduce questi nomi alla città (o al paese, se l'ente non ha una sede
+unica) corrispondente, e si somma a quelle già trovate tramite `CITIES` —
+utile in particolare per i dottorati condivisi dove magari una sede è
+nominata per città e un'altra solo per nome di ateneo. Include anche
+singolarmente i 18 centri di ricerca della **Helmholtz Association**
+(es. "Forschungszentrum Jülich" → Jülich, "DESY" → Amburgo), oltre
+all'associazione generica (che riconduce solo alla Germania, non avendo
+una sede unica). Anche questo elenco è ampliabile allo stesso modo:
+aggiungi una riga `["NomeIstituzione", "Città", "Paese"]` (o `null` al
+posto della città per un ente senza sede unica).
+
+**jobrxiv.org e il nome del datore di lavoro**: su questo sito, a
+differenza degli altri, il nome dell'ente/datore di lavoro spesso compare
+*solo* nella pagina del singolo annuncio, non nell'estratto della pagina
+di ricerca che lo script legge normalmente — per quanto si allarghi il
+testo raccolto lì, quell'informazione non c'è. Per questo, quando un
+annuncio jobrxiv.org non produce nessun luogo dal testo già raccolto, lo
+script scarica anche la sua pagina singola e riprova — solo in quel caso
+specifico, per non moltiplicare inutilmente le richieste verso il sito.
 
 ---
 
@@ -415,6 +427,13 @@ comunque. Da lì, come sempre, è il link "Apri annuncio →" sulla card a
 portare al sito originale. Se non hai ancora segnato nessun annuncio come
 "Ti interessa" (o nessuno di quelli segnati ha un luogo riconosciuto),
 aprendo la mappa compare un messaggio invece della mappa vuota.
+
+Quando più annunci ricadono sulla stessa città (o sullo stesso paese, per
+quelli senza una città precisa), i segnaposto vengono automaticamente
+disposti in un piccolo cerchio invece di sovrapporsi uno sopra l'altro —
+restano tutti visibili e cliccabili singolarmente, e la mappa si zooma
+abbastanza da renderli distinguibili invece di restare a un livello troppo
+lontano per notare la differenza.
 
 **Come funziona tecnicamente**: la mappa usa [Leaflet](https://leafletjs.com)
 (libreria open source, caricata da CDN) con le mappe di sfondo minimali di
