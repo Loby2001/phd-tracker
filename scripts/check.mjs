@@ -357,28 +357,71 @@ const CITIES = [
 ];
 
 // Città più lunghe prima (utile per nomi composti come "San Sebastián").
-const CITY_PATTERNS = CITIES.slice()
+// Si tengono nome e paese "grezzi" e l'escape pre-calcolato: il pattern
+// vero e proprio viene creato al volo in extractCities perché i flag
+// (case-sensitive o no) dipendono dal testo che si sta analizzando, vedi
+// isShoutyText qui sotto.
+const CITY_ENTRIES = CITIES.slice()
   .sort((a, b) => b[0].length - a[0].length)
   .map(([city, country]) => ({
     city,
     country,
-    re: new RegExp(`\\b${city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`), // case-sensitive di proposito
+    escaped: city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
   }));
 
+// Alcune città esistono nell'elenco in più varianti linguistiche (es.
+// "Roma"/"Rome", "Genève"/"Geneva"): quando entrambe compaiono nello stesso
+// annuncio (titolo in una lingua, descrizione nell'altra) questa mappa le
+// riconduce a un'unica forma da mostrare, per non ripetere due volte la
+// stessa città con nomi diversi.
+const CITY_CANONICAL = {
+  roma: "Rome", milano: "Milan", torino: "Turin", firenze: "Florence",
+  napoli: "Naples", padova: "Padua", venezia: "Venice", genova: "Genoa",
+  münchen: "Munich", köln: "Cologne", wien: "Vienna", genève: "Geneva",
+  zürich: "Zurich", lisboa: "Lisbon", warszawa: "Warsaw", kraków: "Krakow",
+  wrocław: "Wroclaw", poznań: "Poznan", gdańsk: "Gdansk", łódź: "Lodz",
+  praha: "Prague", košice: "Kosice", göteborg: "Gothenburg", umeå: "Umea",
+  københavn: "Copenhagen", tromsø: "Tromso", athina: "Athens",
+  beograd: "Belgrade", timișoara: "Timisoara", iași: "Iasi",
+  bucurești: "Bucharest", "den haag": "The Hague", sevilla: "Seville",
+  málaga: "Malaga", córdoba: "Cordoba", cádiz: "Cadiz",
+};
+
+function canonicalCityName(city) {
+  return CITY_CANONICAL[city.toLowerCase()] || city;
+}
+
+// Molti annunci (soprattutto titoli, o campi tipo "Location:") sono scritti
+// TUTTO MAIUSCOLO. Il confronto sulle città è case-sensitive apposta (vedi
+// il commento sopra CITIES) per evitare falsi positivi su parole comuni,
+// ma questo fa sì che un testo interamente maiuscolo non trovi mai nessuna
+// città (perché "BOLOGNA" non è uguale a "Bologna"). Per questi casi si
+// individua il testo "urlato" e si passa a un confronto case-insensitive
+// solo lì: tanto in un testo tutto maiuscolo l'informazione sulle
+// maiuscole/minuscole è comunque persa, quindi non protegge da nulla.
+function isShoutyText(text) {
+  const letters = String(text || "").replace(/[^A-Za-zÀ-ÿ]/g, "");
+  if (letters.length < 20) return false; // troppo corto per giudicare
+  const upper = letters.replace(/[^A-ZÀ-Ý]/g, "").length;
+  return upper / letters.length > 0.85;
+}
+
 // Cerca TUTTE le città riconosciute nel testo (non solo la prima), utile
-// per i dottorati condivisi tra più sedi. Deduplica per nome, mantiene
-// l'ordine di comparsa nel testo, cappa a un numero ragionevole di
-// risultati per non riempire la card con un elenco di partner infinito.
+// per i dottorati condivisi tra più sedi. Deduplica per nome canonico,
+// mantiene l'ordine di comparsa nel testo, cappa a un numero ragionevole
+// di risultati per non riempire la card con un elenco di partner infinito.
 function extractCities(text) {
   if (!text) return [];
+  const flags = isShoutyText(text) ? "i" : "";
   const found = [];
-  const seenCities = new Set();
-  for (const { city, country, re } of CITY_PATTERNS) {
-    if (seenCities.has(city)) continue;
-    const m = text.match(re);
+  const seenCanonical = new Set();
+  for (const { city, country, escaped } of CITY_ENTRIES) {
+    const canonical = canonicalCityName(city).toLowerCase();
+    if (seenCanonical.has(canonical)) continue;
+    const m = text.match(new RegExp(`\\b${escaped}\\b`, flags));
     if (!m) continue;
-    seenCities.add(city);
-    found.push({ city, country, index: m.index });
+    seenCanonical.add(canonical);
+    found.push({ city: canonicalCityName(city), country, index: m.index });
   }
   found.sort((a, b) => a.index - b.index);
   return found.slice(0, 6);
