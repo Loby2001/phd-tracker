@@ -63,8 +63,8 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [organic chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Sweden",
+    "city": "Uppsala",
     "payText": null,
     "id": "id32nt46_90",
     "matchedKeywords": [
@@ -81,8 +81,8 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [synthetic chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Sweden",
+    "city": "Uppsala",
     "payText": null,
     "id": "id3aoadm_54",
     "matchedKeywords": [
@@ -99,8 +99,8 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [electrochemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Sweden",
+    "city": "Uppsala",
     "payText": null,
     "id": "id3aoadm_54",
     "matchedKeywords": [
@@ -121,7 +121,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Netherlands",
+    "city": "Eindhoven, Amsterdam",
+    "payText": null
   },
   {
     "title": "PhD Position in Catalysis for Polymer Recycling (m/f/d) PhD on homogeneous catalysis for chemical polymer recycling: design catalysts, develop processes, mechanistic studies; teaching & supervision. 4-year, 30h/week. MSc Chemistry.",
@@ -135,7 +138,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Austria",
+    "city": "Graz",
+    "payText": null
   },
   {
     "title": "PhD Position in NCCR Genesis: On the rise of molecular complexity at the Origin of Life Fully funded PhD (~4 yrs) on origin-of-life chemistry: peptide amyloids with RNA/membranes, toward self-replicating systems. Requires MS in experimental/physical or organic chemistry.",
@@ -149,7 +155,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Switzerland",
+    "city": "Zurich",
+    "payText": "Fully funded (importo non specificato)"
   },
   {
     "title": "PhD - student Femtosecond Electrochemistry Study aqueous electrolytes at electrode surfaces with ultrafast spectroscopy (femtosecond SFG) to reveal structure/dynamics during electrochemical reactions. MSc Physics/Physical Chemistry. 4-year PhD.",
@@ -163,7 +172,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Netherlands",
+    "city": "Amsterdam",
+    "payText": null
   },
   {
     "title": "MSN - Assistant Professor in Materials, Electrochemistry, and Corrosion Science Seeking an Assistant Professor with 5+ years post-PhD experience in materials, electrochemistry, and corrosion science. Must lead research, teach, and collaborate internationally.",
@@ -177,7 +189,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Morocco",
+    "city": null,
+    "payText": null
   },
   {
     "title": "ACER CoE -Post Doc in Supercapacitors Conduct research on nanoarchitectured materials for supercapacitors, design experiments, publish findings, and supervise students. PhD in relevant field and electrochemistry expertise required.",
@@ -191,7 +206,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Morocco",
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD - student Femtosecond Electrochemistry Study aqueous electrolytes at electrode surfaces with ultrafast spectroscopy (femtosecond SFG) to reveal structure/dynamics during electrochemical reactions. MSc Physics/Physical Chemistry. 4-year PhD.",
@@ -205,7 +223,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Netherlands",
+    "city": "Amsterdam",
+    "payText": null
   },
   {
     "title": "PhD position in Organic Chemistry",
@@ -219,7 +240,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Denmark",
+    "city": "Copenhagen",
+    "payText": null
   },
   {
     "title": "PhD fellowship in Inorganic Chemistry",
@@ -233,7 +257,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Position in Organic Chemistry",
@@ -247,7 +274,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Denmark",
+    "city": "Copenhagen",
+    "payText": null
   },
   {
     "title": "PhD Position – Climate Stress Impacts on the Chemistry of Forest-Derived Organic Aerosols – Chamber and Airborne Measurements",
@@ -261,7 +291,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD student in Inorganic chemistry, Advanced Thermoelectric Materials via Nanoparticle-in-Alloy Engineering in thin film",
@@ -275,7 +308,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Sweden",
+    "city": "Uppsala",
+    "payText": null
   },
   {
     "title": "PhD positions in Organic chemistry",
@@ -289,7 +325,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": "Fully funded (importo non specificato)"
   },
   {
     "title": "PhD Fellowship in Organic Synthesis and Medicinal Chemistry",
@@ -304,7 +343,10 @@
       "organic chemistry",
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Brno",
+    "payText": null
   },
   {
     "title": "PhD positions in organic/medicinal chemistry",
@@ -319,7 +361,10 @@
       "organic chemistry",
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Prague",
+    "payText": null
   },
   {
     "title": "PhD Position in Organic Photochemistry",
@@ -333,7 +378,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Research Scientist (Organic/Polymer Chemistry) – Fresh PHD 1 1",
@@ -347,7 +395,10 @@
     "matchedKeywords": [
       "organic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD student in Synthetic Molecular Chemistry & Photochemistry",
@@ -361,7 +412,10 @@
     "matchedKeywords": [
       "synthetic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Sweden",
+    "city": "Uppsala",
+    "payText": null
   },
   {
     "title": "PhD scholarship in synthetic main group chemistry",
@@ -376,7 +430,10 @@
       "organic chemistry",
       "synthetic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD scholarship in synthetic main group chemistry",
@@ -392,7 +449,10 @@
       "synthetic chemistry",
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Postdoctoral Research Associate in functional polymer and synthetic host-guest chemistry",
@@ -406,7 +466,10 @@
     "matchedKeywords": [
       "synthetic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Research Fellow – School of Chemistry – 107573 – Grade 7",
@@ -420,7 +483,10 @@
     "matchedKeywords": [
       "synthetic chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "United Kingdom",
+    "city": "Birmingham",
+    "payText": "£36,636 to £46,049"
   },
   {
     "title": "PhD Research Fellow in Computational Medicinal Chemistry for Cancer Drug Discovery",
@@ -434,7 +500,10 @@
     "matchedKeywords": [
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Research Fellow in Computational Medicinal Chemistry for Addiction Research",
@@ -448,7 +517,10 @@
     "matchedKeywords": [
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Fellowship in Organic Synthesis and Medicinal Chemistry",
@@ -462,7 +534,10 @@
     "matchedKeywords": [
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Brno",
+    "payText": null
   },
   {
     "title": "PhD positions in organic/medicinal chemistry",
@@ -477,7 +552,10 @@
       "organic chemistry",
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Prague",
+    "payText": null
   },
   {
     "title": "Two PhD positions in organic/medicinal chemistry",
@@ -492,7 +570,10 @@
       "organic chemistry",
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Prague",
+    "payText": null
   },
   {
     "title": "Medicinal Chemistry: PhD Position or Internship",
@@ -506,7 +587,10 @@
     "matchedKeywords": [
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Switzerland",
+    "city": "Zurich",
+    "payText": null
   },
   {
     "title": "PhD position in Organic Chemistry",
@@ -521,7 +605,10 @@
       "organic chemistry",
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Denmark",
+    "city": "Copenhagen",
+    "payText": null
   },
   {
     "title": "PhD Student: Biomolecular Dynamics × AI/ML (ERBIOM project)",
@@ -535,7 +622,10 @@
     "matchedKeywords": [
       "medicinal chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Prague",
+    "payText": null
   },
   {
     "title": "PhD Scholarship in Catalysis",
@@ -549,7 +639,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Studentship: Photocatalysis",
@@ -564,7 +657,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Studentship: MRI/NMR for In-Situ Catalysis & Digital Modelling of Continuous Micro Trickle-Bed Reactors for the Pharmaceutical and Agrochemical Industries",
@@ -578,7 +674,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD fellowships in experimental materials chemistry and electrocatalysis",
@@ -592,7 +691,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Research Fellow in Heterogeneous Catalysis",
@@ -606,7 +708,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD position opening in Computational Catalysis",
@@ -620,7 +725,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Ostrava",
+    "payText": null
   },
   {
     "title": "Funded PhD – Catalysis for Renewable Feedstock Valorisation",
@@ -634,7 +742,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Ireland",
+    "city": "Limerick",
+    "payText": null
   },
   {
     "title": "PhD student in cooperative organocatalysis",
@@ -648,7 +759,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Estonia",
+    "city": "Tallinn",
+    "payText": null
   },
   {
     "title": "PhD position in Computational Chemistry: Characterization and Catalysis on nano-porous materials",
@@ -662,7 +776,10 @@
     "matchedKeywords": [
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Pardubice",
+    "payText": null
   },
   {
     "title": "PhD Position in Sustainable Polymer Chemistry and Catalysis",
@@ -677,7 +794,10 @@
       "synthetic chemistry",
       "catalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Germany",
+    "city": "Berlin",
+    "payText": null
   },
   {
     "title": "PhD Studentship: Photocatalysis",
@@ -692,7 +812,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Doctoral (Phd) position in Nanotechnology and Functional materials, with focus on metal-organic frameworks (MOFs) for environmental application",
@@ -707,7 +830,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Position in Organic Chemistry",
@@ -723,7 +849,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Denmark",
+    "city": "Copenhagen",
+    "payText": null
   },
   {
     "title": "PhD position opening in ab initio Modeling of Nanostructures",
@@ -738,7 +867,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Ostrava",
+    "payText": null
   },
   {
     "title": "PhD position opening in Computational Catalysis",
@@ -753,7 +885,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Ostrava",
+    "payText": null
   },
   {
     "title": "Postdoctoral Research Associate in Polymer Chemistry",
@@ -768,7 +903,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "United Kingdom",
+    "city": "Oxford",
+    "payText": null
   },
   {
     "title": "Postdoctoral Research Associate in Inorganic Materials Chemistry",
@@ -783,7 +921,10 @@
       "catalysis",
       "photocatalysis"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Research Fellow in Solid-state electrochemistry",
@@ -797,7 +938,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD position in electrochemistry and spectroscopy of 2D materials",
@@ -811,7 +955,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Position – Development of Advanced Iron Anodes for Long-Duration Energy Storage",
@@ -825,7 +972,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Position – 3D ion beam tomography of next-generation batteries",
@@ -839,7 +989,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Scholarship Opportunity – Safe and Sustainable Electrolytes for Next-Generation Rechargeable Metal Batteries",
@@ -853,7 +1006,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Scholarship in Catalysis",
@@ -868,7 +1024,10 @@
       "catalysis",
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD position in charge transport and streaming electrification at the oil–cellulose interface",
@@ -882,7 +1041,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Sweden",
+    "city": "Uppsala",
+    "payText": null
   },
   {
     "title": "PhD Position – Self-driving Lab specialising in the Automated Development of Electrochemical Catalyst Inks and Coatings",
@@ -896,7 +1058,10 @@
     "matchedKeywords": [
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Postdoctoral Position (f/m/d) | Spectro-Microscopy Studies of Complex Processes in Thermal Catalysis and Electrochemistry",
@@ -911,7 +1076,10 @@
       "catalysis",
       "electrochemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Position in Sustainable Polymer Chemistry and Catalysis",
@@ -927,7 +1095,10 @@
       "catalysis",
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Germany",
+    "city": "Berlin",
+    "payText": null
   },
   {
     "title": "PhD Position – Development of Advanced Iron Anodes for Long-Duration Energy Storage",
@@ -941,7 +1112,10 @@
     "matchedKeywords": [
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD position in Organic Chemistry",
@@ -956,7 +1130,10 @@
       "organic chemistry",
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Denmark",
+    "city": "Copenhagen",
+    "payText": null
   },
   {
     "title": "PhD Student (f/m/d) Metallurgical Extraction of Critical Raw Materials from Future Electronic Devices Towards Responsible Electronics – 2026/93",
@@ -970,7 +1147,10 @@
     "matchedKeywords": [
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Scholarship Opportunity – Safe and Sustainable Electrolytes for Next-Generation Rechargeable Metal Batteries",
@@ -984,7 +1164,10 @@
     "matchedKeywords": [
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD candidate / Research associate (f/m/d) for the synthesis and characterization of hydrogen bonded organic frameworks for optoelectronic and photovoltaic applications 67% (part-time)",
@@ -998,7 +1181,10 @@
     "matchedKeywords": [
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Postdoctoral Research Associate in Polymer Chemistry",
@@ -1012,7 +1198,10 @@
     "matchedKeywords": [
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "United Kingdom",
+    "city": "Oxford",
+    "payText": null
   },
   {
     "title": "PhD Fellow in Plant Protein Nanofibrils",
@@ -1026,7 +1215,10 @@
     "matchedKeywords": [
       "sustainable chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD fellowship in greenhouse gases, forest soils and biogeochemistry",
@@ -1040,7 +1232,10 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Fellow in Plant Protein Nanofibrils",
@@ -1054,7 +1249,10 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD fellowship in geochronology and mineralogy",
@@ -1068,7 +1266,10 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "Doctoral (Phd) position in Nanotechnology and Functional materials, with focus on metal-organic frameworks (MOFs) for environmental application",
@@ -1082,7 +1283,10 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Scholarship in Catalysis",
@@ -1097,7 +1301,10 @@
       "catalysis",
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Scholarship Opportunity – Processing intelligence for green metals using in situ X-ray characterisation and machine learning",
@@ -1111,7 +1318,10 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD fellowships in RNA interference in plants",
@@ -1125,7 +1335,10 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": null,
+    "city": null,
+    "payText": null
   },
   {
     "title": "PhD Position in Applied and Landscape Ecology (Prague, 4 years, starting October 2026)",
@@ -1139,6 +1352,9 @@
     "matchedKeywords": [
       "green chemistry"
     ],
-    "firstSeen": "2026-08-03T21:27:39.402Z"
+    "firstSeen": "2026-08-03T21:27:39.402Z",
+    "country": "Czech Republic",
+    "city": "Prague",
+    "payText": null
   }
 ]
