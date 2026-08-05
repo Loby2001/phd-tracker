@@ -467,7 +467,13 @@ const INSTITUTIONS = [
   ["Norwegian University of Science and Technology", "Trondheim", "Norway"],
   ["University of Helsinki", "Helsinki", "Finland"], ["Aalto University", "Espoo", "Finland"],
   ["University of Vienna", "Vienna", "Austria"], ["TU Wien", "Vienna", "Austria"],
-  ["Charles University", "Prague", "Czech Republic"], ["Jagiellonian University", "Krakow", "Poland"],
+  ["Charles University", "Prague", "Czech Republic"],
+  ["Masaryk University", "Brno", "Czech Republic"], ["RECETOX", "Brno", "Czech Republic"],
+  // L'istituto ha sede a Řež, un paese immediatamente a nord di Praga (fa
+  // parte dell'area metropolitana della Czech Academy of Sciences): si
+  // ricollega a Praga, non essendo Řež nell'elenco CITIES.
+  ["Institute of Inorganic Chemistry", "Prague", "Czech Republic"],
+  ["Jagiellonian University", "Krakow", "Poland"],
   ["University of Warsaw", "Warsaw", "Poland"], ["Complutense", "Madrid", "Spain"],
   ["Universidad Autónoma de Madrid", "Madrid", "Spain"], ["Universitat de Barcelona", "Barcelona", "Spain"],
   ["Universitat Pompeu Fabra", "Barcelona", "Spain"], ["Universidade de Lisboa", "Lisbon", "Portugal"],
@@ -703,15 +709,15 @@ async function fetchHtmlListing(url, { hrefTest, baseUrl, minTitleLen = 8, sourc
       items.push({
         title,
         link,
-        // Prima era troncato a 500 caratteri: bastava per la scadenza (di
-        // solito vicina all'inizio), ma spesso tagliava via il nome
-        // dell'ateneo/ente prima che comparisse nel testo (specialmente su
-        // jobrxiv.org, dove il titolo si ripete più volte nel blocco prima
-        // del testo utile), impedendo il riconoscimento di città/istituzioni
-        // che stanno più in fondo. 3000 caratteri coprono la stragrande
-        // maggioranza degli annunci senza appesantire troppo i dati salvati
-        // (la card in pagina mostra comunque solo un estratto più corto).
-        description: context.slice(0, 3000),
+        // Nessun taglio: prima era troncato (500, poi 3000 caratteri), ma
+        // tagliava via il nome dell'ateneo/ente quando compariva più avanti
+        // nel testo (specialmente su jobrxiv.org, dove il titolo si ripete
+        // più volte nel blocco prima del testo utile), impedendo il
+        // riconoscimento di città/istituzioni. Su richiesta esplicita
+        // dell'utente si usa ora tutto il testo del blocco dell'annuncio,
+        // senza limite di caratteri — a costo di far crescere un po' di più
+        // i dati salvati in listings.json.
+        description: context,
         pubDate: null,
         deadlineText,
         deadlineISO,
@@ -835,12 +841,13 @@ async function fetchJobrxivDetailText(url) {
     // Il nome del datore di lavoro compare di solito vicino all'inizio del
     // contenuto vero dell'annuncio, ma nel testo grezzo della pagina può
     // essere preceduto da migliaia di caratteri di menu, pulsanti "Login to
-    // bookmark" e simili: un taglio troppo corto (il vecchio limite di 4000
-    // caratteri) rischiava di tagliarlo via. Si combinano quindi i dati
-    // strutturati (se trovati) con una porzione ben più ampia del testo
-    // visibile, per non perdere l'indizio in nessuno dei due casi.
+    // bookmark" e simili: un taglio a un numero fisso di caratteri (prima
+    // 4000, poi 12000) rischiava sempre di tagliarlo via in qualche caso.
+    // Su richiesta esplicita dell'utente si usa ora tutto il testo visibile
+    // della pagina, senza nessun limite, combinato con i dati strutturati
+    // (se trovati) per non perdere l'indizio in nessuno dei due casi.
     const jsonLdText = jsonLdBits.filter(Boolean).join(" ");
-    return `${jsonLdText} ${bodyText.slice(0, 12000)}`.trim();
+    return `${jsonLdText} ${bodyText}`.trim();
   } catch (err) {
     console.warn(`⚠️  jobrxiv.org (pagina annuncio) ${url}: ${err.message}`);
     return "";

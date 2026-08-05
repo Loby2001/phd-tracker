@@ -337,18 +337,19 @@ trovati, non solo il primo; verificato leggendo l'esempio reale caricato
 (4 annunci distinti in un'unica email, estratti tutti correttamente) e
 ri-confermato con un test dedicato.
 
-**Filtro materia non applicato agli annunci via email**: a differenza
-degli annunci raschiati dai siti, quelli via email hanno solo il titolo,
-senza descrizione estesa — richiedere che una parola chiave configurata
-compaia lì per esteso scartava quasi tutto, anche annunci in tema (es.
-"organic **electronics**" invece di "organic **chemistry**"). Dato che
-questi annunci sono già filtrati a monte dalla ricerca salvata impostata
-direttamente sul sito EURAXESS/FindAPhD, per loro il filtro materia locale
-(`keywords` in `config.json`) non si applica più: passano comunque il
-filtro "è un dottorato" (`phdIndicatorWords`) e le parole da escludere
-(`excludeKeywords`, es. "postdoc"). Verificato con l'esempio reale: dei 4
-annunci nella mail, i 2 che erano davvero posizioni di dottorato ora
-passano, i 2 post-dottorato restano esclusi come previsto. Per FindAPhD il template esatto
+**Nessun filtro locale applicato agli annunci via email**: a differenza
+degli annunci raschiati dai siti, quelli via email hanno solo un titolo
+breve, spesso generico — richiedere che ci compaia per esteso una parola
+chiave (es. "organic **chemistry**", scartando "organic **electronics**")
+o una parola come "phd"/"doctoral" (molti bandi europei hanno titoli
+generici come "CALL FOR EXPRESSIONS OF INTEREST" che non nominano mai
+"PhD" pur essendolo) scartava anche annunci del tutto pertinenti. Dato che
+questi annunci sono già filtrati a monte dalla ricerca salvata che hai
+impostato direttamente sul sito EURAXESS/FindAPhD, per loro **nessun
+filtro locale si applica più** (né materia, né "è un dottorato", né le
+parole da escludere, né il filtro paese): se l'email contiene un link
+riconosciuto, l'annuncio compare nell'app. Verificato con due esempi
+email reali. Per FindAPhD il template esatto
 non è ancora stato verificato: l'estrazione resta quella generica (cerca i
 link il cui indirizzo corrisponde al formato stabile di un singolo annuncio,
 `findaphd.com/phds/project/...`) — non estrae automaticamente scadenza o
@@ -431,12 +432,16 @@ Nella pagina del singolo annuncio, lo script cerca prima i dati
 strutturati "JobPosting" (schema.org, formato `JSON-LD` pensato per i
 motori di ricerca) quando presenti: se ci sono, il nome del datore di
 lavoro e la sede arrivano da lì, puliti e senza ambiguità. In aggiunta
-(non in alternativa, per sicurezza), legge anche fino a 12.000 caratteri
-del testo visibile della pagina — un tetto precedente, più basso, tagliava
-via il nome dell'ente in diversi casi reali (es. "Helmholtz Association of
-German Research Centers"), perché nel testo grezzo della pagina compare
-dopo menu, pulsanti "Login to bookmark" e simili, spesso oltre i primi
-7.000-9.000 caratteri.
+(non in alternativa, per sicurezza), legge anche **tutto** il testo
+visibile della pagina, senza nessun limite di caratteri — un tetto fisso,
+per quanto ampio, tagliava sempre via il nome dell'ente in qualche caso
+reale (es. "Helmholtz Association of German Research Centers", che nel
+testo grezzo della pagina compare dopo menu, pulsanti "Login to bookmark"
+e simili, spesso oltre i primi 7.000-9.000 caratteri). Lo stesso vale per
+il testo raccolto dalle pagine di ricerca degli altri siti (jobs.ac.uk,
+academicpositions.com, AcademicTransfer, ecc.): nessun taglio, si usa
+tutto il testo del blocco dell'annuncio. Il rovescio della medaglia è che
+`data/listings.json` cresce un po' di più a ogni annuncio salvato.
 
 ---
 
