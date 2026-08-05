@@ -1105,6 +1105,14 @@ async function fetchMailAlerts(config) {
 // ---------------------------------------------------------------------------
 function matchesPhdIndicator(item, config) {
   if (!config.requirePhdIndicator) return true;
+  // Stesso ragionamento fatto per le parole chiave di materia: un annuncio
+  // via alert email ha solo un titolo breve, spesso generico (es. "CALL FOR
+  // EXPRESSIONS OF INTEREST", frequente per certi bandi europei) che non
+  // nomina esplicitamente "PhD"/"doctoral" pur essendo effettivamente una
+  // posizione di dottorato — e la ricerca salvata impostata direttamente
+  // sul sito EURAXESS/FindAPhD è già scope-ata a posizioni di dottorato, non
+  // serve ririchiederlo qui sul solo titolo.
+  if (isMailAlertItem(item)) return true;
   const hay = norm(item.title + " " + item.description);
   return (config.phdIndicatorWords || []).some((w) => hay.includes(norm(w)));
 }
@@ -1131,11 +1139,17 @@ function matchedKeywords(item, config) {
 }
 
 function isExcluded(item, config) {
+  // Su richiesta esplicita dell'utente: nessun filtro locale sugli annunci
+  // via alert email, a parte avere un link — la ricerca salvata impostata
+  // sul sito EURAXESS/FindAPhD è già il filtro. Chi vuole scartare un
+  // annuncio via email lo fa da lì, non qui.
+  if (isMailAlertItem(item)) return false;
   const hay = norm(item.title + " " + item.description);
   return (config.excludeKeywords || []).some((k) => hay.includes(norm(k)));
 }
 
 function matchesCountry(item, config) {
+  if (isMailAlertItem(item)) return true;
   const countries = config.countries || [];
   if (countries.length === 0) return true; // nessun filtro paese impostato
   // Preferisci il campo paese già estratto (più preciso); se assente, ripiega
