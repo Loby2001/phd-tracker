@@ -227,10 +227,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [sustainable chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Sweden",
+    "city": "Uppsala, Lund",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1skjxwj_73",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -246,10 +246,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [sustainable chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Sweden",
+    "city": "Uppsala, Lund, Stockholm",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "idzsbrxs_58",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -320,10 +320,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [electrochemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Germany",
+    "city": "Jülich, Karlsruhe, Aachen",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax5x3w_51",
     "matchedKeywords": [
       "electrochemistry"
@@ -342,7 +342,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1rhlr5o_123",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -361,7 +361,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1bzjnu5_67",
     "matchedKeywords": [
       "catalysis",
@@ -381,7 +381,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax5x3w_51",
     "matchedKeywords": [
       "electrochemistry",
@@ -417,10 +417,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [sustainable chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Denmark",
+    "city": "Copenhagen",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1vmqkh4_61",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -436,10 +436,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [green chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Denmark",
+    "city": "Copenhagen",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1vmqkh4_61",
     "matchedKeywords": [
       "green chemistry"
@@ -711,7 +711,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1l76z9w_200",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -749,7 +749,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1kld21o_70",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -1222,10 +1222,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [sustainable chemistry]",
     "countryHint": null,
-    "country": null,
+    "country": "Singapore",
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ec7oln_116",
     "matchedKeywords": [
       "electrochemistry",
@@ -1427,10 +1427,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [green chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Germany",
+    "city": "Cologne, Jülich, Dresden, Munich",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax59kk_51",
     "matchedKeywords": [
       "green chemistry"
@@ -1957,10 +1957,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [sustainable chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Germany",
+    "city": "Jülich, Karlsruhe, Munich, Tübingen",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1g1n9pu_131",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -2142,10 +2142,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [green chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Denmark",
+    "city": "Copenhagen, Aarhus",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id18wd651_86",
     "matchedKeywords": [
       "green chemistry"
@@ -2423,7 +2423,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ipk0w4_113",
     "matchedKeywords": [
       "electrochemistry",
@@ -2440,10 +2440,10 @@
     "deadlineISO": null,
     "source": "jobrxiv.org [green chemistry]",
     "countryHint": null,
-    "country": null,
-    "city": null,
+    "country": "Germany",
+    "city": "Jülich, Munich, Göttingen, Dresden +1",
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax3eo7_51",
     "matchedKeywords": [
       "electrochemistry",
@@ -2573,7 +2573,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax3dvn_51",
     "matchedKeywords": [
       "electrochemistry",
