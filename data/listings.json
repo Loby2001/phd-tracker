@@ -3388,7 +3388,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax5vqw_51",
     "matchedKeywords": [
       "green chemistry"
@@ -6247,7 +6247,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax2rrx_51",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -6646,7 +6646,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "idqn8knl_99",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -6665,7 +6665,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1snt6ya_80",
     "matchedKeywords": [
       "electrochemistry",
@@ -6685,7 +6685,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "idqn8knl_99",
     "matchedKeywords": [
       "green chemistry"
@@ -6758,7 +6758,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id112igc5_114",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -6939,7 +6939,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1g6hld2_135",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -7197,7 +7197,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id17raasx_126",
     "matchedKeywords": [
       "green chemistry"
@@ -7310,7 +7310,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1awk6u3_51",
     "matchedKeywords": [
       "green chemistry"
@@ -7422,7 +7422,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1awiasf_51",
     "matchedKeywords": [
       "green chemistry"
@@ -7441,7 +7441,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1awkw61_51",
     "matchedKeywords": [
       "green chemistry"
@@ -7520,7 +7520,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1ax0vev_51",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -8012,7 +8012,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id5g5prw_101",
     "matchedKeywords": [
       "electrochemistry",
@@ -9034,7 +9034,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "idvktfuu_89",
     "matchedKeywords": [
       "electrochemistry"
@@ -9053,7 +9053,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id15pztop_135",
     "matchedKeywords": [
       "electrochemistry"
@@ -9072,7 +9072,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id143b29o_53",
     "matchedKeywords": [
       "catalysis",
@@ -9111,7 +9111,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id1awiw4k_51",
     "matchedKeywords": [
       "electrochemistry"
@@ -9151,7 +9151,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "idgk1lx1_106",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -9190,7 +9190,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "idjdikry_164",
     "matchedKeywords": [
       "sustainable chemistry"
@@ -9209,7 +9209,7 @@
     "country": null,
     "city": null,
     "payText": null,
-    "locTried": false,
+    "locTried": true,
     "id": "id15pztop_135",
     "matchedKeywords": [
       "sustainable chemistry"
